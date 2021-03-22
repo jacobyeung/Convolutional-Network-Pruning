@@ -1,3 +1,3 @@
 # CS-182-Project
 
-Next Generation Simpsons
+Next Generation Simpsons (NGS)
