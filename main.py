@@ -15,7 +15,7 @@ def main():
                         help="Experiment number")
     parser.add_argument('--data_path', type=str, default='./data/tiny-imagenet-200',
                         help="path to data")
-    parser.add_argument('--model_path', type=str,
+    parser.add_argument('--model_path', type=str, default=None,
                         help="model path")
     parser.add_argument('--seed', type=int,
                         help="numpy and pytorch seed")
@@ -38,7 +38,7 @@ def main():
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
 
     model = model_name
-    model.load_state_dict(torch.load(model_path))
+    # model.load_state_dict(torch.load(model_path))
 
     data_dir = Path(data_path)
     image_count = len(list(data_dir.glob('**/*.JPEG')))
