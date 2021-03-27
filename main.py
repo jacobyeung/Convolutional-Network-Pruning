@@ -76,4 +76,4 @@ def main():
     base_data = f"{base}/data"
     Path(base_data).mkdir(exist_ok=True)
 
-    train_loop(model, params, ds, base_data, model_id, device="cuda")
+    train_loop(model, params, ds, base_data, model_id, device=device)

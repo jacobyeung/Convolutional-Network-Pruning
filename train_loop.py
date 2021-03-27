@@ -31,8 +31,6 @@ def train_loop(model, params, ds, base_data, model_id, device="cpu", max_epochs=
             model, metrics=funcs, device=device)
         valid_evaluator = create_supervised_evaluator(
             model, metrics=funcs, device=device)
-        test_evaluator = create_supervised_evaluator(
-            model, metrics=funcs, device=device)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
