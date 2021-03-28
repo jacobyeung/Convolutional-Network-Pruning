@@ -2,14 +2,13 @@ import argparse
 from pathlib import Path
 import numpy as np
 import torch
+from torch import nn
 import torchvision
 import torchvision.transforms as transforms
 from train_loop import train_loop
-from models import model_name
-
+from models import ResNet50
 
 def main():
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--experiment', type=int,
                         help="Experiment number")
@@ -30,15 +29,17 @@ def main():
     seed = args['seed']
     device = args['device']
     batch_size = 128
-
     model_id = f"{experiment}_{seed}"
 
     rng = np.random.RandomState(seed)
     int_info = np.iinfo(int)
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
 
-    model = model_name
-    # model.load_state_dict(torch.load(model_path))
+    model = torchvision.models.resnet50(pretrained=True)
+    for param in model.parameters():
+        param.requires_grad = False
+    model.fc = nn.Linear(2048, 200)
+    #model.load_state_dict(torch.load(model_path))
 
     data_dir = Path(data_path)
     image_count = len(list(data_dir.glob('**/*.JPEG')))
@@ -77,3 +78,6 @@ def main():
     Path(base_data).mkdir(exist_ok=True)
 
     train_loop(model, params, ds, base_data, model_id, device=device)
+
+if __name__ == '__main__':
+    main()
