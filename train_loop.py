@@ -15,7 +15,7 @@ import torch.nn.functional as F
 def train_loop(model, params, ds, base_data, model_id, device="cpu", max_epochs=100):
     ds_train, ds_valid = ds
 
-    with create_summary_writer(model, ds_train, base_data, model_id) as writer:
+    with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
         mom = params['momentum']
         wd = params['l2_wd']
