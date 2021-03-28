@@ -8,6 +8,7 @@ import torchvision.transforms as transforms
 from train_loop import train_loop
 from models import ResNet50
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--experiment', type=int,
@@ -39,7 +40,8 @@ def main():
     for param in model.parameters():
         param.requires_grad = False
     model.fc = nn.Linear(2048, 200)
-    #model.load_state_dict(torch.load(model_path))
+    model.to(device)
+    # model.load_state_dict(torch.load(model_path))
 
     data_dir = Path(data_path)
     image_count = len(list(data_dir.glob('**/*.JPEG')))
@@ -78,6 +80,7 @@ def main():
     Path(base_data).mkdir(exist_ok=True)
 
     train_loop(model, params, ds, base_data, model_id, device=device)
+
 
 if __name__ == '__main__':
     main()
