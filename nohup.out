@@ -43,3 +43,42 @@ TermSocket.open: Opened 1
 [I 17:10:38.818 LabApp] Saving file at /Untitled.ipynb
 [I 17:12:38.856 LabApp] Saving file at /Untitled.ipynb
 [I 17:13:02.503 LabApp] Saving file at /Untitled.ipynb
+[I 23:06:34.258 LabApp] interrupted
+Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+1 active kernel
+The Jupyter Notebook is running at:
+http://localhost:8890/?token=d842084f935286e6d11ec68fd23a49f6269e4d099c66cbc3
+ or http://127.0.0.1:8890/?token=d842084f935286e6d11ec68fd23a49f6269e4d099c66cbc3
+Shutdown this notebook server (y/[n])? [C 23:06:36.292 LabApp] received signal 2, stopping
+[I 23:06:36.298 LabApp] Shutting down 1 kernel
+[I 23:06:36.813 LabApp] Kernel shutdown: cf22b87e-98dd-4d54-af5a-ab5d751a8cfe
+Traceback (most recent call last):
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/config/loader.py", line 254, in __getitem__
+    return dict.__getitem__(self, key)
+KeyError: 'nbserver_extensions'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacobyeung/anaconda3/bin/jupyter-lab", line 10, in <module>
+    sys.exit(main())
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/jupyter_core/application.py", line 270, in launch_instance
+    return super(JupyterApp, cls).launch_instance(argv=argv, **kwargs)
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/config/application.py", line 663, in launch_instance
+    app.initialize(argv)
+  File "<decorator-gen-7>", line 2, in initialize
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/config/application.py", line 87, in catch_config_error
+    return method(app, *args, **kwargs)
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/notebook/notebookapp.py", line 1767, in initialize
+    self.init_server_extension_config()
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/notebook/notebookapp.py", line 1654, in init_server_extension_config
+    self.config.NotebookApp.nbserver_extensions.update({modulename: enabled})
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/config/loader.py", line 279, in __getattr__
+    return self.__getitem__(key)
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/config/loader.py", line 262, in __getitem__
+    v = LazyConfigValue()
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/traitlets.py", line 958, in __new__
+    inst.setup_instance(*args, **kwargs)
+  File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/traitlets.py", line 982, in setup_instance
+    def setup_instance(self, *args, **kwargs):
+KeyboardInterrupt
