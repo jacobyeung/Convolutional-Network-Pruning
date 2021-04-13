@@ -82,3 +82,46 @@ Traceback (most recent call last):
   File "/Users/jacobyeung/anaconda3/lib/python3.8/site-packages/traitlets/traitlets.py", line 982, in setup_instance
     def setup_instance(self, *args, **kwargs):
 KeyboardInterrupt
+[I 13:33:53.869 LabApp] JupyterLab extension loaded from /Users/jacobyeung/anaconda3/lib/python3.8/site-packages/jupyterlab
+[I 13:33:53.889 LabApp] JupyterLab application directory is /Users/jacobyeung/anaconda3/share/jupyter/lab
+[I 13:33:53.893 LabApp] Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+[I 13:33:53.893 LabApp] The Jupyter Notebook is running at:
+[I 13:33:53.893 LabApp] http://localhost:8890/?token=ea7d546bea01b41f9cf75e5e822fdcc87e739eda5f816246
+[I 13:33:53.893 LabApp]  or http://127.0.0.1:8890/?token=ea7d546bea01b41f9cf75e5e822fdcc87e739eda5f816246
+[I 13:33:53.893 LabApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 13:33:53.950 LabApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///Users/jacobyeung/Library/Jupyter/runtime/nbserver-92884-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8890/?token=ea7d546bea01b41f9cf75e5e822fdcc87e739eda5f816246
+     or http://127.0.0.1:8890/?token=ea7d546bea01b41f9cf75e5e822fdcc87e739eda5f816246
+[I 13:33:58.675 LabApp] Build is up to date
+[W 13:33:59.519 LabApp] Notebook timer.ipynb is not trusted
+[W 13:33:59.575 LabApp] Notebook validation.ipynb is not trusted
+[I 13:34:00.174 LabApp] Kernel started: 589d02ec-fa8c-466a-9a4c-1d706251e037
+[I 13:34:00.187 LabApp] Kernel started: 993b95e5-dffd-432e-bed8-491bad038c20
+[I 13:34:01.026 LabApp] Starting buffering for 993b95e5-dffd-432e-bed8-491bad038c20:759af332-66fb-4c69-bcd8-636efbd4925f
+[I 13:34:24.476 LabApp] Creating new notebook in /
+[I 13:34:24.705 LabApp] Kernel started: d01f93a2-7419-42ee-9e91-1c5736ff69f6
+[I 13:36:00.070 LabApp] Saving file at /validation.ipynb
+[W 13:36:00.071 LabApp] Notebook validation.ipynb is not trusted
+[I 13:36:24.663 LabApp] Saving file at /Untitled.ipynb
+[I 13:38:24.702 LabApp] Saving file at /val_creator.ipynb
+[I 13:40:24.731 LabApp] Saving file at /val_creator.ipynb
+[I 13:42:24.851 LabApp] Saving file at /val_creator.ipynb
+[I 13:44:24.882 LabApp] Saving file at /val_creator.ipynb
+[I 13:46:24.913 LabApp] Saving file at /val_creator.ipynb
+[I 13:46:48.798 LabApp] Saving file at /val_creator.ipynb
+[I 13:47:00.968 LabApp] interrupted
+Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+3 active kernels
+The Jupyter Notebook is running at:
+http://localhost:8890/?token=ea7d546bea01b41f9cf75e5e822fdcc87e739eda5f816246
+ or http://127.0.0.1:8890/?token=ea7d546bea01b41f9cf75e5e822fdcc87e739eda5f816246
+Shutdown this notebook server (y/[n])? [C 13:47:03.358 LabApp] received signal 2, stopping
+[I 13:47:03.361 LabApp] Shutting down 3 kernels
+[C 13:47:03.571 LabApp] received signal 2, stopping
+[I 13:47:03.673 LabApp] Kernel shutdown: 589d02ec-fa8c-466a-9a4c-1d706251e037
+[I 13:47:03.675 LabApp] Kernel shutdown: 993b95e5-dffd-432e-bed8-491bad038c20
+[I 13:47:03.676 LabApp] Kernel shutdown: d01f93a2-7419-42ee-9e91-1c5736ff69f6
