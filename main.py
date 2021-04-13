@@ -37,13 +37,12 @@ def main():
     rng = np.random.RandomState(seed)
     int_info = np.iinfo(int)
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
-    model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
-    # if model_path:
-    #     model.load_state_dict(torch.load(model_path)['model'])
-    # else:
-    #     for param in model.parameters():
-    #         param.requires_grad = False
-    #     model.fc = nn.Linear(2048, 200)
+    # model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
+    model = torchvision.models.resnet50(pretrained=True)
+    if model_path:
+        model.load_state_dict(torch.load(model_path)['model'])
+    else:
+        model.fc = nn.Linear(2048, 200)
     model.to(device)
     
 
