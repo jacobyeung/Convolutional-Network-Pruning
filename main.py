@@ -54,7 +54,7 @@ def main():
 
     data_transforms = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0, 0, 0), tuple(np.sqrt((255, 255, 255)))),
+        transforms.Normalize((0.4802, 0.4481, 0.3975), (0.274, 0.276, 0.277)),
     ])
 
     train_set = torchvision.datasets.ImageFolder(
