@@ -33,6 +33,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
 #             model, metrics=funcs, device=device)
         
         def validation_step(engine, batch):
+            print("validation step")
             model.eval()
             run_loss = 0.0
             right = 0
@@ -52,6 +53,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
+            print("log valid results")
 #             metrics = valid_evaluator.state.metrics
             avg_nll, valid_avg_accuracy = valid_evaluator.state.output
 #             valid_avg_accuracy = metrics['accuracy']
