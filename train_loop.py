@@ -29,24 +29,33 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
                                             device=device)
         train_evaluator = create_supervised_evaluator(
             model, metrics=funcs, device=device)
-        valid_evaluator = create_supervised_evaluator(
-            model, metrics=funcs, device=device)
+#         valid_evaluator = create_supervised_evaluator(
+#             model, metrics=funcs, device=device)
         
         def validation_step(engine, batch):
             model.eval()
+            run_loss = 0.0
+            right = 0
+            total = 0
             with torch.no_grad():
                 x, y = batch
                 x = x.to(device)
                 y = y.to(device)
-                pred = model.forward(x)
-                los = loss(pred, )
+                ans = model.forward(x)
+                los = loss(ans, y)
+                right = torch.sum(torch.eq(torch.argmax(ans, dim=1), y))
+                total = y.shape[0]
+                run_loss = los.item()
+            return run_loss, right/total
+        valid_evaluator = Engine(validation_step)
         
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
-            metrics = valid_evaluator.state.metrics
-            valid_avg_accuracy = metrics['accuracy']
-            avg_nll = metrics['loss']
+#             metrics = valid_evaluator.state.metrics
+            avg_nll, valid_avg_accuracy = valid_evaluator.state.output
+#             valid_avg_accuracy = metrics['accuracy']
+#             avg_nll = metrics['loss']
             print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
                   .format(engine.state.epoch, valid_avg_accuracy, avg_nll))
             writer.add_scalar("validation/avg_loss",
@@ -62,50 +71,51 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
             avg_nll = metrics['accuracy']
             sched.step(avg_nll)
 
-        @trainer.on(Events.ITERATION_COMPLETED)
-        def log_training_loss(engine):
-            batch = engine.state.batch
-            ds = DataLoader(TensorDataset(*batch),
-                            batch_size=params['batch_size'])
-            train_evaluator.run(ds)
-            metrics = train_evaluator.state.metrics
-            accuracy = metrics['accuracy']
-            nll = metrics['loss']
-            iter = (engine.state.iteration - 1) % len(ds_train) + 1
-            if (iter % 100) == 0:
-                print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
-                      .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
-            writer.add_scalar("batchtraining/detloss", nll, engine.state.epoch)
-            writer.add_scalar("batchtraining/accuracy",
-                              accuracy, engine.state.iteration)
-            writer.add_scalar("batchtraining/error", 1. -
-                              accuracy, engine.state.iteration)
-            writer.add_scalar("batchtraining/loss",
-                              engine.state.output, engine.state.iteration)
+#         @trainer.on(Events.ITERATION_COMPLETED)
+#         def log_training_loss(engine):
+#             batch = engine.state.batch
+#             ds = DataLoader(TensorDataset(*batch),
+#                             batch_size=params['batch_size'])
+#             train_evaluator.run(ds)
+#             metrics = train_evaluator.state.metrics
+#             accuracy = metrics['accuracy']
+#             nll = metrics['loss']
+#             iter = (engine.state.iteration - 1) % len(ds_train) + 1
+#             if (iter % 100) == 0:
+#                 print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
+#                       .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
+#             writer.add_scalar("batchtraining/detloss", nll, engine.state.epoch)
+#             writer.add_scalar("batchtraining/accuracy",
+#                               accuracy, engine.state.iteration)
+#             writer.add_scalar("batchtraining/error", 1. -
+#                               accuracy, engine.state.iteration)
+#             writer.add_scalar("batchtraining/loss",
+#                               engine.state.output, engine.state.iteration)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_lr(engine):
             writer.add_scalar(
                 "lr", optimizer.param_groups[0]['lr'], engine.state.epoch)
 
-        @trainer.on(Events.EPOCH_COMPLETED)
-        def log_training_results(engine):
-            train_evaluator.run(ds_train)
-            metrics = train_evaluator.state.metrics
-            avg_accuracy = metrics['accuracy']
-            avg_nll = metrics['loss']
-            print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-                  .format(engine.state.epoch, avg_accuracy, avg_nll))
-            writer.add_scalar("training/avg_loss", avg_nll, engine.state.epoch)
-            writer.add_scalar("training/avg_accuracy",
-                              avg_accuracy, engine.state.epoch)
-            writer.add_scalar("training/avg_error", 1. -
-                              avg_accuracy, engine.state.epoch)
+#         @trainer.on(Events.EPOCH_COMPLETED)
+#         def log_training_results(engine):
+#             train_evaluator.run(ds_train)
+#             metrics = train_evaluator.state.metrics
+#             avg_accuracy = metrics['accuracy']
+#             avg_nll = metrics['loss']
+#             print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+#                   .format(engine.state.epoch, avg_accuracy, avg_nll))
+#             writer.add_scalar("training/avg_loss", avg_nll, engine.state.epoch)
+#             writer.add_scalar("training/avg_accuracy",
+#                               avg_accuracy, engine.state.epoch)
+#             writer.add_scalar("training/avg_error", 1. -
+#                               avg_accuracy, engine.state.epoch)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def validation_value(engine):
-            metrics = valid_evaluator.state.metrics
-            valid_avg_accuracy = metrics['accuracy']
+#             metrics = valid_evaluator.state.metrics
+#             valid_avg_accuracy = metrics['accuracy']
+            avg_nll, valid_avg_accuracy = valid_evaluator.state.output
             return valid_avg_accuracy
 
         checkpoint = ModelCheckpoint(os.path.join(base_data, model_id), model_id,
