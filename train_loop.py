@@ -40,11 +40,11 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
             avg_nll = metrics['loss']
             print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
                   .format(engine.state.epoch, valid_avg_accuracy, avg_nll))
-            writer.add_scalar("valdation/avg_loss",
+            writer.add_scalar("validation/avg_loss",
                               avg_nll, engine.state.epoch)
-            writer.add_scalar("valdation/avg_accuracy",
+            writer.add_scalar("validation/avg_accuracy",
                               valid_avg_accuracy, engine.state.epoch)
-            writer.add_scalar("valdation/avg_error", 1. -
+            writer.add_scalar("validation/avg_error", 1. -
                               valid_avg_accuracy, engine.state.epoch)
 
         @trainer.on(Events.EPOCH_COMPLETED)
