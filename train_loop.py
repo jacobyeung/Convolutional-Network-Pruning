@@ -31,7 +31,16 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
             model, metrics=funcs, device=device)
         valid_evaluator = create_supervised_evaluator(
             model, metrics=funcs, device=device)
-
+        
+        def validation_step(engine, batch):
+            model.eval()
+            with torch.no_grad():
+                x, y = batch
+                x = x.to(device)
+                y = y.to(device)
+                pred = model.forward(x)
+                los = loss(pred, )
+        
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)

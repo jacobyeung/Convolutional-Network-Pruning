@@ -125,3 +125,89 @@ Shutdown this notebook server (y/[n])? [C 13:47:03.358 LabApp] received signal 2
 [I 13:47:03.673 LabApp] Kernel shutdown: 589d02ec-fa8c-466a-9a4c-1d706251e037
 [I 13:47:03.675 LabApp] Kernel shutdown: 993b95e5-dffd-432e-bed8-491bad038c20
 [I 13:47:03.676 LabApp] Kernel shutdown: d01f93a2-7419-42ee-9e91-1c5736ff69f6
+[I 20:18:15.456 LabApp] JupyterLab extension loaded from /Users/jacobyeung/anaconda3/lib/python3.8/site-packages/jupyterlab
+[I 20:18:15.457 LabApp] JupyterLab application directory is /Users/jacobyeung/anaconda3/share/jupyter/lab
+[I 20:18:15.461 LabApp] Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+[I 20:18:15.461 LabApp] The Jupyter Notebook is running at:
+[I 20:18:15.461 LabApp] http://localhost:8890/?token=189a7011530bed82ae7be79d928ce928b0d54185d0781855
+[I 20:18:15.461 LabApp]  or http://127.0.0.1:8890/?token=189a7011530bed82ae7be79d928ce928b0d54185d0781855
+[I 20:18:15.461 LabApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 20:18:15.481 LabApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///Users/jacobyeung/Library/Jupyter/runtime/nbserver-86135-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8890/?token=189a7011530bed82ae7be79d928ce928b0d54185d0781855
+     or http://127.0.0.1:8890/?token=189a7011530bed82ae7be79d928ce928b0d54185d0781855
+[I 20:18:18.978 LabApp] Build is up to date
+[W 20:18:19.387 LabApp] 404 GET /api/contents/Imitation_Learning.ipynb?content=0&1619320699381 (127.0.0.1): No such file or directory: Imitation_Learning.ipynb
+[W 20:18:19.387 LabApp] No such file or directory: Imitation_Learning.ipynb
+[W 20:18:19.387 LabApp] 404 GET /api/contents/Imitation_Learning.ipynb?content=0&1619320699381 (127.0.0.1) 1.54ms referer=http://localhost:8890/lab
+[I 20:18:29.323 LabApp] interrupted
+Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+0 active kernels
+The Jupyter Notebook is running at:
+http://localhost:8890/?token=189a7011530bed82ae7be79d928ce928b0d54185d0781855
+ or http://127.0.0.1:8890/?token=189a7011530bed82ae7be79d928ce928b0d54185d0781855
+Shutdown this notebook server (y/[n])? [C 20:18:31.217 LabApp] received signal 2, stopping
+[I 20:18:31.217 LabApp] Shutting down 0 kernels
+[I 2021-04-24 20:19:14.078 ServerApp] jupyterlab | extension was successfully linked.
+[I 2021-04-24 20:19:14.509 ServerApp] nbclassic | extension was successfully linked.
+[I 2021-04-24 20:19:14.560 LabApp] JupyterLab extension loaded from /Users/jacobyeung/anaconda3/envs/ml/lib/python3.7/site-packages/jupyterlab
+[I 2021-04-24 20:19:14.560 LabApp] JupyterLab application directory is /Users/jacobyeung/anaconda3/envs/ml/share/jupyter/lab
+[I 2021-04-24 20:19:14.566 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2021-04-24 20:19:14.573 ServerApp] nbclassic | extension was successfully loaded.
+[I 2021-04-24 20:19:14.573 ServerApp] Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+[I 2021-04-24 20:19:14.574 ServerApp] Jupyter Server 1.2.3 is running at:
+[I 2021-04-24 20:19:14.574 ServerApp] http://localhost:8890/lab?token=390f84fe10f632729c09f62e66a3b2622821680e801884a2
+[I 2021-04-24 20:19:14.574 ServerApp]  or http://127.0.0.1:8890/lab?token=390f84fe10f632729c09f62e66a3b2622821680e801884a2
+[I 2021-04-24 20:19:14.574 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2021-04-24 20:19:14.591 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///Users/jacobyeung/Library/Jupyter/runtime/jpserver-86169-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8890/lab?token=390f84fe10f632729c09f62e66a3b2622821680e801884a2
+     or http://127.0.0.1:8890/lab?token=390f84fe10f632729c09f62e66a3b2622821680e801884a2
+[I 2021-04-24 20:19:19.615 LabApp] Build is up to date
+[I 2021-04-24 20:24:15.192 ServerApp] Creating new notebook in 
+[I 2021-04-24 20:24:15.529 ServerApp] Kernel started: f25c90ee-1d1d-4782-a60d-d13571a1f580
+[I 2021-04-24 20:26:15.435 ServerApp] Saving file at /prune.ipynb
+[I 2021-04-24 20:27:53.786 ServerApp] Creating new file in 
+[I 2021-04-24 20:28:16.315 ServerApp] Saving file at /prune.ipynb
+[I 2021-04-24 20:35:51.023 ServerApp] Saving file at /model_creator.py
+[I 2021-04-24 20:36:17.350 ServerApp] Saving file at /prune.ipynb
+[I 2021-04-24 20:36:57.706 ServerApp] Saving file at /model_creator.py
+[I 2021-04-24 20:37:08.148 ServerApp] Saving file at /model_creator.py
+[I 2021-04-24 20:37:30.150 ServerApp] Saving file at /model_creator.py
+[I 2021-04-24 20:37:37.924 ServerApp] Saving file at /model_creator.py
+[I 2021-04-24 20:38:17.384 ServerApp] Saving file at /prune.ipynb
+[I 2021-04-24 20:42:41.343 ServerApp] Saving file at /model_creator.py
+[I 2021-04-24 20:43:40.636 ServerApp] Kernel restarted: f25c90ee-1d1d-4782-a60d-d13571a1f580
+[I 2021-04-24 20:44:17.438 ServerApp] Saving file at /prune.ipynb
+[I 2021-04-24 20:46:17.474 ServerApp] Saving file at /prune.ipynb
+[I 2021-04-27 03:38:43.437 ServerApp] Starting buffering for f25c90ee-1d1d-4782-a60d-d13571a1f580:20961afa-826f-4626-8df5-7ef408805849
+[I 16:21:18.099 LabApp] The port 8890 is already in use, trying another port.
+[I 16:21:18.385 LabApp] JupyterLab extension loaded from /Users/jacobyeung/anaconda3/lib/python3.8/site-packages/jupyterlab
+[I 16:21:18.386 LabApp] JupyterLab application directory is /Users/jacobyeung/anaconda3/share/jupyter/lab
+[I 16:21:18.389 LabApp] Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+[I 16:21:18.389 LabApp] The Jupyter Notebook is running at:
+[I 16:21:18.390 LabApp] http://localhost:8891/?token=c4a7922a4e79cd1b3fe89771477cf0d924ef322c9ed45fad
+[I 16:21:18.390 LabApp]  or http://127.0.0.1:8891/?token=c4a7922a4e79cd1b3fe89771477cf0d924ef322c9ed45fad
+[I 16:21:18.390 LabApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 16:21:18.408 LabApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///Users/jacobyeung/Library/Jupyter/runtime/nbserver-36223-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8891/?token=c4a7922a4e79cd1b3fe89771477cf0d924ef322c9ed45fad
+     or http://127.0.0.1:8891/?token=c4a7922a4e79cd1b3fe89771477cf0d924ef322c9ed45fad
+[I 16:21:21.537 LabApp] Build is up to date
+[I 16:23:33.759 LabApp] Saving file at /train_loop.py
+[W 16:24:51.582 LabApp] Notebook validation.ipynb is not trusted
+[I 16:24:52.112 LabApp] Kernel started: 31e7cafa-f3d9-4e7f-a76e-7e29ddaa61ca
+[I 16:25:33.792 LabApp] Saving file at /train_loop.py
+[I 16:26:52.025 LabApp] Saving file at /validation.ipynb
+[W 16:26:52.027 LabApp] Notebook validation.ipynb is not trusted
+[I 16:27:34.686 LabApp] Saving file at /train_loop.py
+[I 16:27:50.912 LabApp] Saving file at /train_loop.py
