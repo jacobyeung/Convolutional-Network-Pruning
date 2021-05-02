@@ -27,10 +27,6 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
         loss = funcs['loss']._loss_fn
         trainer = create_supervised_trainer(model, optimizer, loss,
                                             device=device)
-#         train_evaluator = create_supervised_evaluator(
-#             model, metrics=funcs, device=device)
-#         valid_evaluator = create_supervised_evaluator(
-#             model, metrics=funcs, device=device)
         
         def train_eval_step(engine, batch):
             print(f"epoch: {engine.state.epoch}")
@@ -74,10 +70,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             print("log valid results")
-#             metrics = valid_evaluator.state.metrics
             avg_nll, valid_avg_accuracy = valid_evaluator.state.output
-#             valid_avg_accuracy = metrics['accuracy']
-#             avg_nll = metrics['loss']
             print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
                   .format(engine.state.epoch, valid_avg_accuracy, avg_nll))
             writer.add_scalar("validation/avg_loss",
@@ -89,8 +82,6 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def lr_scheduler(engine):
-#             metrics = valid_evaluator.state.metrics
-#             avg_nll = metrics['accuracy']
             avg_nll, valid_avg_accuracy = valid_evaluator.state.output
             sched.step(avg_nll)
 
@@ -100,14 +91,11 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
             ds = DataLoader(TensorDataset(*batch),
                             batch_size=params['batch_size'])
             train_evaluator.run(ds)
-#             metrics = train_evaluator.state.metrics
             nll, accuracy = train_evaluator.state.output
-#             accuracy = metrics['accuracy']
-#             nll = metrics['loss']
-#             iter = (engine.state.iteration - 1) % len(ds_train) + 1
-#             if (iter % 100) == 0:
-#                 print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
-#                       .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
+            iter = (engine.state.iteration - 1) % len(ds_train) + 1
+            if (iter % 100) == 0:
+                print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
+                      .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
             writer.add_scalar("batchtraining/detloss", nll, engine.state.epoch)
             writer.add_scalar("batchtraining/accuracy",
                               accuracy, engine.state.iteration)
@@ -123,10 +111,8 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_training_results(engine):
-            train_evaluator.run(ds_valid)
+            train_evaluator.run(ds_train)
             avg_nll, avg_accuracy = train_evaluator.state.output
-#             avg_accuracy = metrics['accuracy']
-#             avg_nll = metrics['loss']
             print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
                   .format(engine.state.epoch, avg_accuracy, avg_nll))
             writer.add_scalar("training/avg_loss", avg_nll, engine.state.epoch)
@@ -137,19 +123,17 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def validation_value(engine):
-#             metrics = valid_evaluator.state.metrics
-#             valid_avg_accuracy = metrics['accuracy']
             avg_nll, valid_avg_accuracy = valid_evaluator.state.output
             return valid_avg_accuracy
 
         checkpoint = ModelCheckpoint(os.path.join(base_data, model_id), model_id,
                                    score_function=validation_value,
                                      score_name='valid_{}'.format('accuracy'))
-        #early_stopping = EarlyStopping(20, score_function=validation_value,
-        #                               trainer=trainer)
+        early_stopping = EarlyStopping(20, score_function=validation_value,
+                                      trainer=trainer)
         trainer.add_event_handler(
             Events.EPOCH_COMPLETED, checkpoint, {'model': model})
-        #valid_evaluator.add_event_handler(Events.COMPLETED, early_stopping)
+        valid_evaluator.add_event_handler(Events.COMPLETED, early_stopping)
 
         to_save = {'trainer': trainer, 'model': model,
                    'optimizer': optimizer, 'lr_scheduler': sched}
@@ -157,5 +141,5 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
             base_data, "resume_training"), create_dir=True))
         # kick everything off
         trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
-#         trainer.run(ds_train, max_epochs=max_epochs)
-        trainer.run(ds_valid, max_epochs=max_epochs)
+        trainer.run(ds_train, max_epochs=max_epochs)
+
