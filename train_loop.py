@@ -29,7 +29,6 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
                                             device=device)
         
         def train_eval_step(engine, batch):
-            print(f"epoch: {engine.state.epoch}")
             model.eval()
             run_loss = 0.0
             right = 0
@@ -48,7 +47,6 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
         train_evaluator = Engine(train_eval_step)
     
         def validation_step(engine, batch):
-            print(f"epoch: {engine.state.epoch}")
             model.eval()
             run_loss = 0.0
             right = 0
@@ -69,7 +67,6 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
-            print("log valid results")
             avg_nll, valid_avg_accuracy = valid_evaluator.state.output
             print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
                   .format(engine.state.epoch, valid_avg_accuracy, avg_nll))
