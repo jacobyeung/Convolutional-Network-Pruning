@@ -39,20 +39,22 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
             optimizer.zero_grad()
             l.backward()
             optimizer.step()
-            return l.item()
-        trainer = Engine(train_step)
-        
-        def train_eval_step(engine, batch):
-            model.eval()
-            with torch.no_grad():
-                x, y = batch
-                x = x.to(device)
-                y = y.to(device)
-                ans = model.forward(x)
             return ans, y
-        train_evaluator = Engine(train_eval_step)
-        acc_metric.attach(train_evaluator, "accuracy")
-        loss_metric.attach(train_evaluator, 'loss')
+        trainer = Engine(train_step)
+        acc_metric.attach(trainer, "accuracy")
+        loss_metric.attach(trainer, 'loss')
+        
+#         def train_eval_step(engine, batch):
+#             model.eval()
+#             with torch.no_grad():
+#                 x, y = batch
+#                 x = x.to(device)
+#                 y = y.to(device)
+#                 ans = model.forward(x)
+#             return ans, y
+#         train_evaluator = Engine(train_eval_step)
+#         acc_metric.attach(train_evaluator, "accuracy")
+#         loss_metric.attach(train_evaluator, 'loss')
         
         def validation_step(engine, batch):
             model.eval()
@@ -88,7 +90,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.ITERATION_COMPLETED)
         def log_training_loss(engine):
-            metrics = train_evaluator.state.metrics
+            metrics = engine.state.metrics
             accuracy = metrics['accuracy']
             nll = metrics['loss']
             iter = (engine.state.iteration - 1) % len(ds_train) + 1
@@ -110,7 +112,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_training_results(engine):
-            metrics = train_evaluator.state.metrics
+            metrics = engine.state.metrics
             avg_accuracy = metrics['accuracy']
             avg_nll = metrics['loss']
             print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
