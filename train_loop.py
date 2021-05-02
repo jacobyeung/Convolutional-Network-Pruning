@@ -12,7 +12,7 @@ from ignite.metrics import Accuracy, Loss
 import torch.nn.functional as F
 
 
-def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
+def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
     ds_train, ds_valid = ds
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
@@ -130,10 +130,10 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
 #             Events.EPOCH_COMPLETED, checkpoint, {'model': model})
         #valid_evaluator.add_event_handler(Events.COMPLETED, early_stopping)
 
-        to_save = {'trainer': trainer, 'model': model,
-                   'optimizer': optimizer, 'lr_scheduler': sched}
-        handler = Checkpoint(to_save, DiskSaver(os.path.join(
-            base_data, "resume_training"), create_dir=True))
+        # to_save = {'trainer': trainer, 'model': model,
+        #            'optimizer': optimizer, 'lr_scheduler': sched}
+        # handler = Checkpoint(to_save, DiskSaver(os.path.join(
+        #     base_data, "resume_training"), create_dir=True))
         # kick everything off
 #         trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
 #         trainer.run(ds_train, max_epochs=max_epochs)
