@@ -101,13 +101,13 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
                             batch_size=params['batch_size'])
             train_evaluator.run(ds)
 #             metrics = train_evaluator.state.metrics
-            avg_nll, valid_avg_accuracy = train_evaluator.state.output
+            nll, accuracy = train_evaluator.state.output
 #             accuracy = metrics['accuracy']
 #             nll = metrics['loss']
-            iter = (engine.state.iteration - 1) % len(ds_train) + 1
-            if (iter % 100) == 0:
-                print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
-                      .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
+#             iter = (engine.state.iteration - 1) % len(ds_train) + 1
+#             if (iter % 100) == 0:
+#                 print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
+#                       .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
             writer.add_scalar("batchtraining/detloss", nll, engine.state.epoch)
             writer.add_scalar("batchtraining/accuracy",
                               accuracy, engine.state.iteration)
@@ -123,7 +123,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_training_results(engine):
-            train_evaluator.run(ds_train)
+            train_evaluator.run(ds_valid)
             avg_nll, avg_accuracy = train_evaluator.state.output
 #             avg_accuracy = metrics['accuracy']
 #             avg_nll = metrics['loss']
