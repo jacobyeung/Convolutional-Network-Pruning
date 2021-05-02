@@ -12,7 +12,7 @@ from ignite.metrics import Accuracy, Loss
 import torch.nn.functional as F
 
 
-def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
+def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
     ds_train, ds_valid = ds
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
@@ -25,15 +25,15 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
         funcs = {'accuracy': Accuracy(),
                  'loss': Loss(F.cross_entropy)}
         loss = funcs['loss']._loss_fn
-#         trainer = create_supervised_trainer(model, optimizer, loss,
-#                                             device=device)
+        trainer = create_supervised_trainer(model, optimizer, loss,
+                                            device=device)
 #         train_evaluator = create_supervised_evaluator(
 #             model, metrics=funcs, device=device)
 #         valid_evaluator = create_supervised_evaluator(
 #             model, metrics=funcs, device=device)
         
         def validation_step(engine, batch):
-            print("validation step")
+            print(f"epoch: {engine.state.epoch}")
             model.eval()
             run_loss = 0.0
             right = 0
@@ -50,7 +50,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
             return run_loss, right/total
         valid_evaluator = Engine(validation_step)
         
-        @valid_evaluator.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             print("log valid results")
@@ -67,7 +67,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
             writer.add_scalar("validation/avg_error", 1. -
                               valid_avg_accuracy, engine.state.epoch)
 
-        @valid_evaluator.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.EPOCH_COMPLETED)
         def lr_scheduler(engine):
 #             metrics = valid_evaluator.state.metrics
 #             avg_nll = metrics['accuracy']
@@ -95,7 +95,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
 #             writer.add_scalar("batchtraining/loss",
 #                               engine.state.output, engine.state.iteration)
 
-        @valid_evaluator.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.EPOCH_COMPLETED)
         def log_lr(engine):
             writer.add_scalar(
                 "lr", optimizer.param_groups[0]['lr'], engine.state.epoch)
@@ -114,27 +114,27 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=500):
 #             writer.add_scalar("training/avg_error", 1. -
 #                               avg_accuracy, engine.state.epoch)
 
-        @valid_evaluator.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.EPOCH_COMPLETED)
         def validation_value(engine):
 #             metrics = valid_evaluator.state.metrics
 #             valid_avg_accuracy = metrics['accuracy']
             avg_nll, valid_avg_accuracy = valid_evaluator.state.output
             return valid_avg_accuracy
 
-        checkpoint = ModelCheckpoint(os.path.join(base_data, model_id), model_id,
-                                     score_function=validation_value,
-                                     score_name='valid_{}'.format('accuracy'))
+#         checkpoint = ModelCheckpoint(os.path.join(base_data, model_id), model_id,
+#                                      score_function=validation_value,
+#                                      score_name='valid_{}'.format('accuracy'))
         #early_stopping = EarlyStopping(20, score_function=validation_value,
         #                               trainer=trainer)
 #         trainer.add_event_handler(
 #             Events.EPOCH_COMPLETED, checkpoint, {'model': model})
         #valid_evaluator.add_event_handler(Events.COMPLETED, early_stopping)
 
-        to_save = {'trainer': trainer, 'model': model,
-                   'optimizer': optimizer, 'lr_scheduler': sched}
-        handler = Checkpoint(to_save, DiskSaver(os.path.join(
-            base_data, "resume_training"), create_dir=True))
+        # to_save = {'trainer': trainer, 'model': model,
+        #            'optimizer': optimizer, 'lr_scheduler': sched}
+        # handler = Checkpoint(to_save, DiskSaver(os.path.join(
+        #     base_data, "resume_training"), create_dir=True))
         # kick everything off
 #         trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
 #         trainer.run(ds_train, max_epochs=max_epochs)
-        valid_evaluator.run(ds_valid, max_epochs=max_epochs)
+        trainer.run(ds_valid, max_epochs=max_epochs)
