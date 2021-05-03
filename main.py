@@ -6,6 +6,7 @@ from torch import nn
 import torchvision
 import torchvision.transforms as transforms
 from train_loop import train_loop
+from adv_train_loop import adv_train_loop
 from models import ResNet50
 from efficientnet_pytorch import EfficientNet as EN
 
@@ -33,7 +34,7 @@ def main():
     batch_size = 128
     model_id = f"{experiment}_{seed}"
     num_workers = 0
-    
+
     rng = np.random.RandomState(seed)
     int_info = np.iinfo(int)
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
@@ -44,7 +45,6 @@ def main():
     else:
         model.fc = nn.Linear(2048, 200)
     model.to(device)
-    
 
     data_dir = Path(data_path)
     image_count = len(list(data_dir.glob('**/*.JPEG')))
@@ -53,8 +53,9 @@ def main():
     print('Discovered {} images'.format(image_count))
 
     data_transforms = transforms.Compose([
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize((0.4802, 0.4481, 0.3975), (0.274, 0.276, 0.277)),
+        transforms.Normalize((0.4805, 0.4483, 0.3978), (0.263, 0.257, 0.267)),
     ])
 
     train_set = torchvision.datasets.ImageFolder(
@@ -76,14 +77,20 @@ def main():
     params['momentum'] = 0.98
     params['l2_wd'] = 3.4e-5
     params['batch_size'] = batch_size
-
     Path('outputs').mkdir(exist_ok=True)
     base = f"outputs/experiment_{experiment}"
     Path(base).mkdir(exist_ok=True)
     base_data = f"{base}/data"
     Path(base_data).mkdir(exist_ok=True)
 
-    train_loop(model, params, ds, base_data, model_id, device=device)
+    print('\nstarting training on augmented dataset\n')
+
+    # train_loop(model, params, ds, base_data, model_id, device, 1)
+
+    print('\nstarting training adversarial models\n')
+
+    for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
+        adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 1)
 
 
 if __name__ == '__main__':

@@ -1,8 +1,9 @@
 import os
-import pickle
+import copy
 from utils import create_summary_writer
 import torch
 import ignite
+import torch.nn as nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader, TensorDataset
 from ignite.engine import (Engine, Events)
@@ -10,10 +11,16 @@ from ignite.handlers import (ModelCheckpoint, EarlyStopping,
                              Checkpoint, DiskSaver, global_step_from_engine)
 from ignite.metrics import Accuracy, Loss
 import torch.nn.functional as F
+from art.attacks.evasion import FastGradientMethod, BasicIterativeMethod, CarliniLInfMethod, DeepFool
+from art.estimators.classification import PyTorchClassifier
 
 
-def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
+def adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, max_epochs=5):
     ds_train, ds_valid = ds
+    original_model = copy.deepcopy(model)  # used to generate adv images for the trained model
+    original_model.eval()
+    model = copy.deepcopy(model)  # making a copy so that original model is not changed
+    model_id = f'{model_id}_{attack_type}'
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
@@ -32,11 +39,35 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
         acc_val_metric = Accuracy(device=device)
         loss_val_metric = Loss(F.cross_entropy, device=device)
 
+        classifier = PyTorchClassifier(
+            model=original_model,
+            clip_values=(0, 1),
+            loss=nn.CrossEntropyLoss(),
+            optimizer=optimizer,
+            input_shape=(3, 64, 64),
+            nb_classes=200,
+        )
+
+        attack = None
+
+        if attack_type == "fgsm":
+            attack = FastGradientMethod(estimator=classifier, eps=0.2)
+        elif attack_type == "bim":
+            attack = BasicIterativeMethod(estimator=classifier, eps=0.2)
+        elif attack_type == "carlini":
+            attack = CarliniLInfMethod(classifier=classifier)
+        elif attack_type == "deepfool":
+            attack = DeepFool(classifier=classifier)
+
+
         def train_step(engine, batch):
             model.train()
             x, y = batch
             x = x.to(device)
+            x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
+            x = torch.cat((x, x_adv))
             y = y.to(device)
+            y = torch.cat((y, y))
             ans = model.forward(x)
             l = loss(ans, y)
             optimizer.zero_grad()
@@ -52,10 +83,13 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         def train_eval_step(engine, batch):
             model.eval()
+            x, y = batch
+            x = x.to(device)
+            x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
+            x = torch.cat((x, x_adv))
+            y = y.to(device)
+            y = torch.cat((y, y))
             with torch.no_grad():
-                x, y = batch
-                x = x.to(device)
-                y = y.to(device)
                 ans = model.forward(x)
             return ans, y
 
@@ -65,10 +99,13 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         def validation_step(engine, batch):
             model.eval()
+            x, y = batch
+            x = x.to(device)
+            x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
+            x = torch.cat((x, x_adv))
+            y = y.to(device)
+            y = torch.cat((y, y))
             with torch.no_grad():
-                x, y = batch
-                x = x.to(device)
-                y = y.to(device)
                 ans = model.forward(x)
             return ans, y
 
