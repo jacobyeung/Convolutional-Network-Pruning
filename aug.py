@@ -23,6 +23,7 @@ def transform(file):
     centercrop4 = torchvision.transforms.Compose([torchvision.transforms.CenterCrop(random.randint(50, 60)),
                                                   resize])
     colorjitter5 = torchvision.transforms.ColorJitter(0.3, 0.4, 0.3, 0.3)
+    #gaus6 = torchvision.transforms.GaussianBlur(3)
     fliph7 = torchvision.transforms.RandomHorizontalFlip(0.9)
     flipv7 = torchvision.transforms.RandomVerticalFlip(0.1)
     flip7 = torchvision.transforms.Compose([fliph7, flipv7])
@@ -44,7 +45,7 @@ def transform(file):
 
 i = 0
 for file in files:
-    if i % 1000 == 0:
-        print((i // 100) + ' / 100')
     i += 1
+    if i % 1000 == 0:
+        print(str(i // 1000) + "/100")
     transform(file)
