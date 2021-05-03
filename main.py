@@ -102,7 +102,7 @@ def main():
 #     for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
 #         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 1)
 
-# adv_train_loop(model, params, ds, min_y base_data, model_id, 'fgsm', device, 1)
+# adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, 1)
 
 
 if __name__ == '__main__':
