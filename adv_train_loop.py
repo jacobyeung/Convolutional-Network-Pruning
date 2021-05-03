@@ -16,6 +16,7 @@ from art.estimators.classification import PyTorchClassifier
 
 
 def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, device, max_epochs=5):
+    print('training adversarial:', attack_type)
     ds_train, ds_valid = ds
     min_y_train, min_y_val = min_y
     original_model = copy.deepcopy(model)  # used to generate adv images for the trained model
