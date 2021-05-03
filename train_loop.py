@@ -12,7 +12,7 @@ from ignite.metrics import Accuracy, Loss
 import torch.nn.functional as F
 
 
-def train_loop(model, params, ds, min_y, base_data, model_id, device, max_epochs=2):
+def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, max_epochs=2):
     ds_train, ds_valid = ds
     min_y_train, min_y_val = min_y
 
@@ -98,11 +98,11 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, max_epochs
             avg_nll = metrics['accuracy']
             sched.step(avg_nll)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=25))
+        @trainer.on(Events.ITERATION_COMPLETED(every=100))
         def log_training_loss(engine):
             batch = engine.state.batch
             ds = DataLoader(TensorDataset(*batch),
-                            batch_size=128)
+                            batch_size=32)
             train_evaluator.run(ds)
             metrics = train_evaluator.state.metrics
             # metrics = engine.state.metrics

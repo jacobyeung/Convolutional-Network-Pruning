@@ -12,8 +12,9 @@ from ignite.metrics import Accuracy, Loss
 import torch.nn.functional as F
 
 
-def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
+def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, max_epochs=2):
     ds_train, ds_valid = ds
+    min_y_train, min_y_val = min_y
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
@@ -28,46 +29,54 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         acc_metric = Accuracy(device=device)
         loss_metric = Loss(F.cross_entropy, device=device)
-        
+
+        acc_val_metric = Accuracy(device=device)
+        loss_val_metric = Loss(F.cross_entropy, device=device)
+
         def train_step(engine, batch):
             model.train()
             x, y = batch
             x = x.to(device)
-            y = y.to(device)
+            y = y.to(device) - min_y_train
             ans = model.forward(x)
             l = loss(ans, y)
             optimizer.zero_grad()
             l.backward()
             optimizer.step()
-            return ans, y
+            #             return ans, y
+            return l.item()
+
         trainer = Engine(train_step)
-        acc_metric.attach(trainer, "accuracy")
-        loss_metric.attach(trainer, 'loss')
-        
-#         def train_eval_step(engine, batch):
-#             model.eval()
-#             with torch.no_grad():
-#                 x, y = batch
-#                 x = x.to(device)
-#                 y = y.to(device)
-#                 ans = model.forward(x)
-#             return ans, y
-#         train_evaluator = Engine(train_eval_step)
-#         acc_metric.attach(train_evaluator, "accuracy")
-#         loss_metric.attach(train_evaluator, 'loss')
-        
+
+        #         acc_metric.attach(trainer, "accuracy")
+        #         loss_metric.attach(trainer, 'loss')
+
+        def train_eval_step(engine, batch):
+            model.eval()
+            with torch.no_grad():
+                x, y = batch
+                x = x.to(device)
+                y = y.to(device) - min_y_train
+                ans = model.forward(x)
+            return ans, y
+
+        train_evaluator = Engine(train_eval_step)
+        acc_metric.attach(train_evaluator, "accuracy")
+        loss_metric.attach(train_evaluator, 'loss')
+
         def validation_step(engine, batch):
             model.eval()
             with torch.no_grad():
                 x, y = batch
                 x = x.to(device)
-                y = y.to(device)
+                y = y.to(device) - min_y_val
                 ans = model.forward(x)
             return ans, y
+
         valid_evaluator = Engine(validation_step)
-        acc_metric.attach(valid_evaluator, "accuracy")
-        loss_metric.attach(valid_evaluator, 'loss')
-        
+        acc_val_metric.attach(valid_evaluator, "accuracy")
+        loss_val_metric.attach(valid_evaluator, 'loss')
+
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
@@ -85,12 +94,18 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def lr_scheduler(engine):
-            avg_nll, valid_avg_accuracy = valid_evaluator.state.output
+            metrics = valid_evaluator.state.metrics
+            avg_nll = metrics['accuracy']
             sched.step(avg_nll)
 
-        @trainer.on(Events.ITERATION_COMPLETED)
+        @trainer.on(Events.ITERATION_COMPLETED(every=100))
         def log_training_loss(engine):
-            metrics = engine.state.metrics
+            batch = engine.state.batch
+            ds = DataLoader(TensorDataset(*batch),
+                            batch_size=32)
+            train_evaluator.run(ds)
+            metrics = train_evaluator.state.metrics
+            # metrics = engine.state.metrics
             accuracy = metrics['accuracy']
             nll = metrics['loss']
             iter = (engine.state.iteration - 1) % len(ds_train) + 1
@@ -112,7 +127,9 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_training_results(engine):
-            metrics = engine.state.metrics
+            train_evaluator.run(ds_train)
+            metrics = train_evaluator.state.metrics
+            # metrics = engine.state.metrics
             avg_accuracy = metrics['accuracy']
             avg_nll = metrics['loss']
             print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"

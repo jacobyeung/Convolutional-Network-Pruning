@@ -8,14 +8,13 @@ import torchvision.transforms as transforms
 from train_loop import train_loop
 from adv_train_loop import adv_train_loop
 from models import ResNet50
-from efficientnet_pytorch import EfficientNet as EN
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--experiment', type=int,
                         help="Experiment number")
-    parser.add_argument('--data_path', type=str, default='./data/tiny-imagenet-200',
+    parser.add_argument('--data_path', type=str, default='tiny-imagenet-200',
                         help="path to data")
     parser.add_argument('--model_path', type=str, default=None,
                         help="model path")
@@ -39,7 +38,7 @@ def main():
     int_info = np.iinfo(int)
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
     # model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
-    model = torchvision.models.resnet50(pretrained=True)
+    model = torchvision.models.wide_resnet50_2(pretrained=True)
     if model_path:
         model.load_state_dict(torch.load(model_path)['model'])
     else:
@@ -94,15 +93,15 @@ def main():
 
     print('\nstarting training on augmented dataset\n')
 
-    train_loop(model, params, ds, min_y, base_data, model_id, device, 1)
+    train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, 1)
 
     print('\nstarting training adversarial models\n')
 
 
 #     for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
-#         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 1)
+#         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
 
-# adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, 1)
+#     adv_train_loop(model, params, ds, min_y, base_data, model_id, 'bim', device, batch_size, 1)
 
 
 if __name__ == '__main__':
