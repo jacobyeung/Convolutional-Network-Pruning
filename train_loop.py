@@ -12,8 +12,9 @@ from ignite.metrics import Accuracy, Loss
 import torch.nn.functional as F
 
 
-def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
+def train_loop(model, params, ds, min_y, base_data, model_id, device, max_epochs=2):
     ds_train, ds_valid = ds
+    min_y_train, min_y_val = min_y
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
@@ -36,7 +37,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
             model.train()
             x, y = batch
             x = x.to(device)
-            y = y.to(device)
+            y = y.to(device) - min_y_train
             ans = model.forward(x)
             l = loss(ans, y)
             optimizer.zero_grad()
@@ -55,7 +56,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
             with torch.no_grad():
                 x, y = batch
                 x = x.to(device)
-                y = y.to(device)
+                y = y.to(device) - min_y_train
                 ans = model.forward(x)
             return ans, y
 
@@ -68,7 +69,7 @@ def train_loop(model, params, ds, base_data, model_id, device, max_epochs=2):
             with torch.no_grad():
                 x, y = batch
                 x = x.to(device)
-                y = y.to(device)
+                y = y.to(device) - min_y_val
                 ans = model.forward(x)
             return ans, y
 

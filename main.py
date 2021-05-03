@@ -31,7 +31,7 @@ def main():
     model_path = args['model_path']
     seed = args['seed']
     device = args['device']
-    batch_size = 128
+    batch_size = 32
     model_id = f"{experiment}_{seed}"
     num_workers = 0
 
@@ -60,14 +60,23 @@ def main():
 
     train_set = torchvision.datasets.ImageFolder(
         data_dir / 'train', data_transforms)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=1,
+                                               shuffle=False, pin_memory=True)
+    lowest_train_label = next(iter(train_loader))[1].item()  # sometimes the labels are not zero-indexed
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
                                                shuffle=True, num_workers=num_workers, pin_memory=True)
+
     valid_set = torchvision.datasets.ImageFolder(
         data_dir / 'val', data_transforms)
+    valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=1,
+                                               shuffle=False, pin_memory=True)
+    lowest_valid_label = next(iter(valid_loader))[1].item()
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=batch_size,
-                                               shuffle=True, num_workers=num_workers, pin_memory=True)
+                                               shuffle=False, num_workers=num_workers, pin_memory=True)
+
     ds = [train_loader, valid_loader]
-    batch_size = 128
+    min_y = [lowest_train_label, lowest_valid_label]
+    batch_size = 32
     im_height = 64
     im_width = 64
     num_epochs = 1
@@ -85,12 +94,15 @@ def main():
 
     print('\nstarting training on augmented dataset\n')
 
-    # train_loop(model, params, ds, base_data, model_id, device, 1)
+    train_loop(model, params, ds, min_y, base_data, model_id, device, 1)
 
     print('\nstarting training adversarial models\n')
 
-    for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
-        adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 1)
+
+#     for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
+#         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 1)
+
+# adv_train_loop(model, params, ds, min_y base_data, model_id, 'fgsm', device, 1)
 
 
 if __name__ == '__main__':

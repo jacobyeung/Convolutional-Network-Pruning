@@ -17,6 +17,7 @@ from art.estimators.classification import PyTorchClassifier
 
 def adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, max_epochs=5):
     ds_train, ds_valid = ds
+    min_y_train, min_y_val = min_y
     original_model = copy.deepcopy(model)  # used to generate adv images for the trained model
     original_model.eval()
     model = copy.deepcopy(model)  # making a copy so that original model is not changed
@@ -66,7 +67,7 @@ def adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 
             x = x.to(device)
             x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
             x = torch.cat((x, x_adv))
-            y = y.to(device)
+            y = y.to(device) - min_y_train
             y = torch.cat((y, y))
             ans = model.forward(x)
             l = loss(ans, y)
@@ -87,7 +88,7 @@ def adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 
             x = x.to(device)
             x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
             x = torch.cat((x, x_adv))
-            y = y.to(device)
+            y = y.to(device) - min_y_train
             y = torch.cat((y, y))
             with torch.no_grad():
                 ans = model.forward(x)
@@ -103,7 +104,7 @@ def adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, 
             x = x.to(device)
             x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
             x = torch.cat((x, x_adv))
-            y = y.to(device)
+            y = y.to(device) - min_y_val
             y = torch.cat((y, y))
             with torch.no_grad():
                 ans = model.forward(x)
