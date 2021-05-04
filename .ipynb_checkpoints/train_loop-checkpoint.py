@@ -150,7 +150,8 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size
         handler = Checkpoint(to_save, DiskSaver(os.path.join(base_data, model_id),
                                                 create_dir=True),
                              score_function=validation_value, score_name="val_acc",
-                             global_step_transform=global_step_from_engine(trainer))
+                             global_step_transform=global_step_from_engine(trainer),
+                             n_saved=None)
 
         # kick everything off
         trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)

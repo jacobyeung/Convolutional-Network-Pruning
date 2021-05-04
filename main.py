@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 from train_loop import train_loop
 from adv_train_loop import adv_train_loop
 from models import ResNet50
+import os
+from glob import glob
 
 
 def main():
@@ -93,15 +95,22 @@ def main():
 
     print('\nstarting training on augmented dataset\n')
 
-    train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, 10)
+    train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, 2)
 
     print('\nstarting training adversarial models\n')
-
+    
+    models = list(glob(f"{base_data}/{model_id}/*.pt"))
+    model_scores = np.array([float(str(path).split("=")[-1][:-3]) for path in models])
+    idx = np.argmax(model_scores)
+    model_name = models[idx]
+    model.load_state_dict(torch.load(model_name)['model'])
+    
+        
 
 #     for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
 #         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
 
-#     adv_train_loop(model, params, ds, min_y, base_data, model_id, 'bim', device, batch_size, 1)
+    adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, batch_size, 2)
 
 
 if __name__ == '__main__':
