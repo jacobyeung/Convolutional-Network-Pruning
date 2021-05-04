@@ -5,6 +5,7 @@ import torch
 from torch import nn
 import torchvision
 import torchvision.transforms as transforms
+from efficientnet_pytorch import EfficientNet as EN
 from train_loop import train_loop
 from adv_train_loop import adv_train_loop
 from models import ResNet50
@@ -39,12 +40,12 @@ def main():
     rng = np.random.RandomState(seed)
     int_info = np.iinfo(int)
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
-    # model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
-    model = torchvision.models.wide_resnet50_2(pretrained=True)
-    if model_path:
-        model.load_state_dict(torch.load(model_path)['model'])
-    else:
-        model.fc = nn.Linear(2048, 200)
+    model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
+    # model = torchvision.models.wide_resnet50_2(pretrained=True)
+    # if model_path:
+    #     model.load_state_dict(torch.load(model_path)['model'])
+    # else:
+    #     model.fc = nn.Linear(2048, 200)
     model.to(device)
 
     data_dir = Path(data_path)
@@ -77,7 +78,6 @@ def main():
 
     ds = [train_loader, valid_loader]
     min_y = [lowest_train_label, lowest_valid_label]
-    batch_size = 32
     im_height = 64
     im_width = 64
     num_epochs = 1
