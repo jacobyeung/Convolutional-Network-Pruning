@@ -71,7 +71,7 @@ def main():
                                                shuffle=False, pin_memory=True)
     lowest_valid_label = next(iter(valid_loader))[1].item()
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=batch_size,
-                                               shuffle=False, num_workers=num_workers, pin_memory=True)
+                                               shuffle=True, num_workers=num_workers, pin_memory=True)
 
     ds = [train_loader, valid_loader]
     min_y = [lowest_train_label, lowest_valid_label]
@@ -93,7 +93,7 @@ def main():
 
     print('\nstarting training on augmented dataset\n')
 
-    train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, 1)
+    train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, 10)
 
     print('\nstarting training adversarial models\n')
 
