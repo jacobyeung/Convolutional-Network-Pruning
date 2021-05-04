@@ -163,20 +163,20 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
             writer.add_scalar(
                 "lr", optimizer.param_groups[0]['lr'], engine.state.epoch)
 
-        @trainer.on(Events.EPOCH_COMPLETED)
-        def log_training_results(engine):
-            train_evaluator.run(ds_train)
-            metrics = train_evaluator.state.metrics
-            # metrics = engine.state.metrics
-            avg_accuracy = metrics['accuracy']
-            avg_nll = metrics['loss']
-            print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-                  .format(engine.state.epoch, avg_accuracy, avg_nll))
-            writer.add_scalar("training/avg_loss", avg_nll, engine.state.epoch)
-            writer.add_scalar("training/avg_accuracy",
-                              avg_accuracy, engine.state.epoch)
-            writer.add_scalar("training/avg_error", 1. -
-                              avg_accuracy, engine.state.epoch)
+#         @trainer.on(Events.EPOCH_COMPLETED)
+#         def log_training_results(engine):
+#             train_evaluator.run(ds_train)
+#             metrics = train_evaluator.state.metrics
+#             # metrics = engine.state.metrics
+#             avg_accuracy = metrics['accuracy']
+#             avg_nll = metrics['loss']
+#             print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+#                   .format(engine.state.epoch, avg_accuracy, avg_nll))
+#             writer.add_scalar("training/avg_loss", avg_nll, engine.state.epoch)
+#             writer.add_scalar("training/avg_accuracy",
+#                               avg_accuracy, engine.state.epoch)
+#             writer.add_scalar("training/avg_error", 1. -
+#                               avg_accuracy, engine.state.epoch)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def validation_value(engine):
