@@ -33,7 +33,7 @@ def main():
     model_path = args['model_path']
     seed = args['seed']
     device = args['device']
-    batch_size = 32
+    batch_size = 32  # in case of CUDA out of memory error, decrease this
     model_id = f"{experiment}_{seed}"
     num_workers = 0
 
@@ -103,7 +103,7 @@ def main():
     model_scores = np.array([float(str(path).split("=")[-1][:-3]) for path in models])
     idx = np.argmax(model_scores)
     model_name = models[idx]
-    model.load_state_dict(torch.load(model_name)['model'])
+    model.load_state_dict(torch.load(model_name))
     
         
 
