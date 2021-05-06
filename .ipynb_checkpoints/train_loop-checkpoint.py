@@ -102,7 +102,7 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size
         def log_training_loss(engine):
             batch = engine.state.batch
             ds = DataLoader(TensorDataset(*batch),
-                            batch_size=32)
+                            batch_size=batch_size)
             train_evaluator.run(ds)
             metrics = train_evaluator.state.metrics
             # metrics = engine.state.metrics
@@ -154,6 +154,6 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size
                              n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
 
