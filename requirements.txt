@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 absl-py==0.12.0
 adal==1.2.7
 adversarial-robustness-toolbox==1.6.1
@@ -180,7 +179,6 @@ whichcraft==0.6.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
 yarl==1.6.3
-=======
 absl-py==0.12.0
 adal==1.2.7
 adversarial-robustness-toolbox==1.6.1
@@ -362,5 +360,4 @@ whichcraft==0.6.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
 yarl==1.6.3
->>>>>>> def6e550a2362eb701b4712690395279e9332f44
 zipp==3.4.1
