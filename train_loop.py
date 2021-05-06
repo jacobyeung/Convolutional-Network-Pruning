@@ -77,7 +77,7 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size
         acc_val_metric.attach(valid_evaluator, "accuracy")
         loss_val_metric.attach(valid_evaluator, 'loss')
 
-        @trainer.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5))
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             metrics = valid_evaluator.state.metrics
