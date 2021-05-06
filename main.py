@@ -5,7 +5,6 @@ import torch
 from torch import nn
 import torchvision
 import torchvision.transforms as transforms
-from efficientnet_pytorch import EfficientNet as EN
 from train_loop import train_loop
 from adv_train_loop import adv_train_loop
 from models import ResNet50
@@ -33,19 +32,19 @@ def main():
     model_path = args['model_path']
     seed = args['seed']
     device = args['device']
-    batch_size = 32  # in case of CUDA out of memory error, decrease this
+    batch_size = 16
     model_id = f"{experiment}_{seed}"
     num_workers = 0
 
     rng = np.random.RandomState(seed)
     int_info = np.iinfo(int)
     torch.manual_seed(rng.randint(int_info.min, int_info.max))
-    model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
-    # model = torchvision.models.wide_resnet50_2(pretrained=True)
-    # if model_path:
-    #     model.load_state_dict(torch.load(model_path)['model'])
-    # else:
-    #     model.fc = nn.Linear(2048, 200)
+    # model = EN.from_pretrained('efficientnet-b5', num_classes = 200)
+    model = torchvision.models.resnet101(pretrained=True)
+    if model_path:
+        model.load_state_dict(torch.load(model_path)['model'])
+    else:
+        model.fc = nn.Linear(2048, 200)
     model.to(device)
 
     data_dir = Path(data_path)
@@ -98,19 +97,17 @@ def main():
     train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size, 2)
 
     print('\nstarting training adversarial models\n')
-    
+
     models = list(glob(f"{base_data}/{model_id}/*.pt"))
     model_scores = np.array([float(str(path).split("=")[-1][:-3]) for path in models])
     idx = np.argmax(model_scores)
     model_name = models[idx]
     model.load_state_dict(torch.load(model_name))
-    
-        
 
-#     for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
-#         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
+    #     for attack_type in ["fgsm", "bim", "carlini", "deepfool"]:
+    #         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
 
-    adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, batch_size, 2)
+    adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, batch_size, 1)
 
 
 if __name__ == '__main__':

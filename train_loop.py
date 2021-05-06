@@ -109,7 +109,7 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size
             accuracy = metrics['accuracy']
             nll = metrics['loss']
             iter = (engine.state.iteration - 1) % len(ds_train) + 1
-            if (iter % 100) == 0:
+            if (iter % 50) == 0:
                 print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
                       .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
             writer.add_scalar("batchtraining/detloss", nll, engine.state.epoch)
@@ -154,6 +154,6 @@ def train_loop(model, params, ds, min_y, base_data, model_id, device, batch_size
                              n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
 
