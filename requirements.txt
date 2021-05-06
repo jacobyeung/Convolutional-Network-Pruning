@@ -43,40 +43,7 @@ future==0.18.2
 gcsfs==0.8.0
 gitdb==4.0.7
 GitPython==3.1.14
-<<<<<<< HEAD
-google-api-core==1.26.2
-google-api-python-client==2.1.0
-google-auth==1.28.0
-google-auth-httplib2==0.1.0
-google-auth-oauthlib==0.4.3
-google-cloud-bigquery==2.13.1
-google-cloud-bigquery-storage==2.4.0
-google-cloud-bigtable==2.0.0
-google-cloud-core==1.6.0
-google-cloud-dataproc==2.3.1
-google-cloud-datastore==2.1.0
-google-cloud-firestore==2.1.0
-google-cloud-kms==2.2.0
-google-cloud-language==2.0.0
-google-cloud-logging==2.3.1
-google-cloud-monitoring==2.2.1
-google-cloud-pubsub==1.7.0
-google-cloud-scheduler==2.2.0
-google-cloud-spanner==3.3.0
-google-cloud-speech==2.2.1
-google-cloud-storage==1.37.1
-google-cloud-tasks==2.2.0
-google-cloud-translate==3.1.0
-google-cloud-videointelligence==2.1.0
-google-cloud-vision==2.3.0
-google-crc32c==1.1.2
-google-resumable-media==1.2.0
-googleapis-common-protos==1.53.0
 greenlet==1.0.0
-grpc-google-iam-v1==0.12.3
-=======
-greenlet==1.0.0
->>>>>>> a4eba607e1047eae7a78794e706e44953d065cea
 grpcio==1.37.0
 grpcio-gcp==0.2.2
 htmlmin==0.1.12
@@ -95,17 +62,6 @@ jinja2-time==0.2.0
 joblib==1.0.1
 json5==0.9.5
 jsonschema==3.2.0
-<<<<<<< HEAD
-jupyter-client==6.1.12
-jupyter-core==4.7.1
-jupyter-http-over-ws==0.0.8
-jupyterlab==1.2.16
-jupyterlab-git==0.11.0
-jupyterlab-pygments==0.1.2
-jupyterlab-server==1.2.0
-jupyterlab-widgets==1.0.0
-=======
->>>>>>> a4eba607e1047eae7a78794e706e44953d065cea
 kiwisolver==1.3.1
 kubernetes==12.0.1
 libcst==0.3.18
@@ -223,8 +179,4 @@ whichcraft==0.6.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
 yarl==1.6.3
-<<<<<<< HEAD
 zipp==3.4.1
-=======
-zipp==3.4.1
->>>>>>> a4eba607e1047eae7a78794e706e44953d065cea
