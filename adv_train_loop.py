@@ -117,7 +117,7 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
             model.eval()
             x, y = batch
             x = x.to(device)
-            y = y.to(device) - min_y_train
+            y = y.to(device) - min_y_val
             x_adv = attack.perturb(x, y)
             x = torch.cat((x, x_adv))
             y = torch.cat((y, y))
