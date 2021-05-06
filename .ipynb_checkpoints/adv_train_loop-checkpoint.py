@@ -188,9 +188,10 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
         handler = Checkpoint(to_save, DiskSaver(os.path.join(base_data, model_id),
                                                 create_dir=True),
                              score_function=validation_value, score_name="val_acc",
-                             global_step_transform=global_step_from_engine(trainer))
+                             global_step_transform=global_step_from_engine(trainer),
+                             n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
 
