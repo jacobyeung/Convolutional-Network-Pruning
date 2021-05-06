@@ -178,7 +178,7 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
 #             writer.add_scalar("training/avg_error", 1. -
 #                               avg_accuracy, engine.state.epoch)
 
-        @trainer.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5))
         def validation_value(engine):
             metrics = valid_evaluator.state.metrics
             valid_avg_accuracy = metrics['accuracy']
