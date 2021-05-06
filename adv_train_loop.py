@@ -14,6 +14,10 @@ import torch.nn.functional as F
 from art.attacks.evasion import FastGradientMethod, BasicIterativeMethod, CarliniLInfMethod, DeepFool
 from art.estimators.classification import PyTorchClassifier
 
+from advertorch.context import ctx_noparamgrad_and_eval
+from advertorch.attacks import (PGDAttack, GradientSignAttack, CarliniWagnerL2Attack,
+                                LocalSearchAttack, LBFGSAttack, FastFeatureAttack)
+
 
 def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, device, batch_size, max_epochs=5):
     print('training adversarial:', attack_type)
@@ -22,6 +26,7 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
     original_model = copy.deepcopy(model)  # used to generate adv images for the trained model
     original_model.eval()
     model = copy.deepcopy(model)  # making a copy so that original model is not changed
+    model = model.to(device)
     model_id = f'{model_id}_{attack_type}'
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
@@ -52,23 +57,32 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
 
         attack = None
 
+#         if attack_type == "fgsm":
+#             attack = FastGradientMethod(estimator=classifier, eps=0.2)
+#         elif attack_type == "bim":
+#             attack = BasicIterativeMethod(estimator=classifier, eps=0.2)
+#         elif attack_type == "carlini":
+#             attack = CarliniLInfMethod(classifier=classifier)
+#         elif attack_type == "deepfool":
+#             attack = DeepFool(classifier=classifier)
         if attack_type == "fgsm":
-            attack = FastGradientMethod(estimator=classifier, eps=0.2)
-        elif attack_type == "bim":
-            attack = BasicIterativeMethod(estimator=classifier, eps=0.2)
+            attack = GradientSignAttack(model, loss_fn=loss, eps=0.2)
+        elif attack_type == "ffa":
+            attack = FastFeatureAttack(model, loss_fn=loss, eps=0.3)
         elif attack_type == "carlini":
-            attack = CarliniLInfMethod(classifier=classifier)
-        elif attack_type == "deepfool":
+            attack = CarliniWagnerL2Attack(model, 200, max_iterations=1000)
+        elif attack_type == "lbfgs":
             attack = DeepFool(classifier=classifier)
-
 
         def train_step(engine, batch):
             model.train()
             x, y = batch
             x = x.to(device)
-            x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
-            x = torch.cat((x, x_adv))
             y = y.to(device) - min_y_train
+            with ctx_noparamgrad_and_eval(model):
+                x_adv = attack.perturb(x, y)
+            optimizer.zero_grad()
+            x = torch.cat((x, x_adv))
             y = torch.cat((y, y))
             ans = model.forward(x)
             l = loss(ans, y)
@@ -87,9 +101,9 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
             model.eval()
             x, y = batch
             x = x.to(device)
-            x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
-            x = torch.cat((x, x_adv))
             y = y.to(device) - min_y_train
+            x_adv = attack.perturb(x, y)
+            x = torch.cat((x, x_adv))
             y = torch.cat((y, y))
             with torch.no_grad():
                 ans = model.forward(x)
@@ -103,9 +117,9 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
             model.eval()
             x, y = batch
             x = x.to(device)
-            x_adv = torch.Tensor(attack.generate(x=x.cpu())).to(device)
+            y = y.to(device) - min_y_train
+            x_adv = attack.perturb(x, y)
             x = torch.cat((x, x_adv))
-            y = y.to(device) - min_y_val
             y = torch.cat((y, y))
             with torch.no_grad():
                 ans = model.forward(x)
@@ -115,7 +129,7 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
         acc_val_metric.attach(valid_evaluator, "accuracy")
         loss_val_metric.attach(valid_evaluator, 'loss')
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5))
+        @trainer.on(Events.ITERATION_COMPLETED(every=200*5000//batch_size//10))
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             metrics = valid_evaluator.state.metrics
@@ -136,7 +150,7 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
             avg_nll = metrics['accuracy']
             sched.step(avg_nll)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=500))
+        @trainer.on(Events.ITERATION_COMPLETED(every=50))
         def log_training_loss(engine):
             batch = engine.state.batch
             ds = DataLoader(TensorDataset(*batch),
@@ -178,7 +192,7 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
 #             writer.add_scalar("training/avg_error", 1. -
 #                               avg_accuracy, engine.state.epoch)
 
-        @trainer.on(Events.EPOCH_COMPLETED)
+        @trainer.on(Events.ITERATION_COMPLETED(every=200*5000//batch_size//10))
         def validation_value(engine):
             metrics = valid_evaluator.state.metrics
             valid_avg_accuracy = metrics['accuracy']
@@ -192,6 +206,6 @@ def adv_train_loop(model, params, ds, min_y, base_data, model_id, attack_type, d
                              n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200*5000//batch_size//5), handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200*5000//batch_size//10), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
 
