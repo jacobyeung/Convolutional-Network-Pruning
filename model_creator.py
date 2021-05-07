@@ -67,6 +67,8 @@ def make_conv2d_model(input_shape, output_shape, params):
     lin_layers = ModuleList()
     input_dim = np.prod(output.shape[1:])
     current_dim = params['dense_dim']
+    if params['n_dense_layers'] == 0:
+        return layers, None
     if params['n_dense_layers'] > 1:
         for ii in range(params['n_dense_layers']-1):
             if ii == 0:
@@ -93,6 +95,8 @@ class mod(torch.nn.Module):
         num = x.shape[0]
         for l in self.lay:
             x = l(x)
+        if self.lin == None:
+            return x
         x = x.view(num, -1)
         for l in self.lin:
             x = l(x)
