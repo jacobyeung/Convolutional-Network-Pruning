@@ -44,26 +44,27 @@ def select_filters(model, valid_loader, valid_set):
     """
     worst : list of highest divergence filters (worst filters) across batches
             Can select top-k afterwards.
-    imp   : list of divergences from tensor decomposition reconstruction.
-            lower means filter is more important.
     """
-    imp = []
     worst = []
     for i, data in tqdm(enumerate(valid_loader),
                         total=len(valid_set) / valid_loader.batch_size):
-        x, y = data
-        x = x.to(device)
+        out, y = data
+        out = out.to(device)
         y = y
-        out = model(x)
+        for i, param in enumerate(model.children()):
+            out = param(out)
+            if i == 0:
+                break
+#         out = model(out)
         nout = out.detach()
-        ny = y.detach().numpy()
+
+#         ny = y.detach().numpy()
 #         for j in range(out.shape[-1]//10, out.shape[-1], out.shape[-1]//4):
 #             print(j)
-        cp = dc.tucker(nout, 10)
+        cp = dc.tucker(nout, 25)
         pred = tl.tucker_tensor.tucker_to_tensor(cp)
         dist = torch.cdist(pred, nout)
         importance = torch.mean(dist, dim=[0, 2, 3])
         w = torch.argmax(importance)
         worst.append(w)
-        imp.append(importance.clone().detach())
-    return worst, imp
+    return worst
