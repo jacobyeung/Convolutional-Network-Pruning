@@ -40,7 +40,7 @@ def create_summary_writer(model, data_loader, save_folder, model_id, device='cpu
             print("Failed to save model graph: {}".format(e))
     return writer
 
-def select_filters(model, valid_loader, valid_set, device):
+def select_filters(model, valid_loader, valid_set):
     """
     worst : list of highest divergence filters (worst filters) across batches
             Can select top-k afterwards.
@@ -57,15 +57,13 @@ def select_filters(model, valid_loader, valid_set, device):
         out = model(x)
         nout = out.detach()
         ny = y.detach().numpy()
-        for j in range(out.shape[-1]//10, out.shape[-1], out.shape[-1]//4):
-            print(j)
-            cp = dc.tucker(nout, j)
-            pred = tl.tucker_tensor.tucker_to_tensor(cp)
-            dist = torch.cdist(pred, nout)
-            importance = torch.mean(dist, dim=[0, 2, 3])
-            w = torch.argmax(importance)
-            worst.append(w)
-            imp.append(importance.clone().detach())
-        if i == 10:
-            break
+#         for j in range(out.shape[-1]//10, out.shape[-1], out.shape[-1]//4):
+#             print(j)
+        cp = dc.tucker(nout, 10)
+        pred = tl.tucker_tensor.tucker_to_tensor(cp)
+        dist = torch.cdist(pred, nout)
+        importance = torch.mean(dist, dim=[0, 2, 3])
+        w = torch.argmax(importance)
+        worst.append(w)
+        imp.append(importance.clone().detach())
     return worst, imp
