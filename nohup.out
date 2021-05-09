@@ -211,3 +211,27 @@ Shutdown this notebook server (y/[n])? [C 20:18:31.217 LabApp] received signal 2
 [W 16:26:52.027 LabApp] Notebook validation.ipynb is not trusted
 [I 16:27:34.686 LabApp] Saving file at /train_loop.py
 [I 16:27:50.912 LabApp] Saving file at /train_loop.py
+[I 17:22:47.301 LabApp] JupyterLab extension loaded from /Users/jacobyeung/anaconda3/lib/python3.8/site-packages/jupyterlab
+[I 17:22:47.302 LabApp] JupyterLab application directory is /Users/jacobyeung/anaconda3/share/jupyter/lab
+[I 17:22:47.306 LabApp] Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+[I 17:22:47.306 LabApp] The Jupyter Notebook is running at:
+[I 17:22:47.306 LabApp] http://localhost:8890/?token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b
+[I 17:22:47.306 LabApp]  or http://127.0.0.1:8890/?token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b
+[I 17:22:47.306 LabApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 17:22:47.326 LabApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///Users/jacobyeung/Library/Jupyter/runtime/nbserver-1496-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8890/?token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b
+     or http://127.0.0.1:8890/?token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b
+[I 17:22:50.125 LabApp] Build is up to date
+[W 17:22:50.920 LabApp] Notebook validation.ipynb is not trusted
+[W 17:22:50.961 LabApp] Notebook timer.ipynb is not trusted
+[I 17:22:51.294 LabApp] Kernel started: cc5352e4-4819-455b-85b2-55fd0453da34
+[I 17:22:51.308 LabApp] Kernel started: ae9e34dd-bd4a-49a5-9271-17c54cfc6371
+[I 17:22:51.321 LabApp] Kernel started: 4e874dfe-9b02-4862-9a98-d846fed58d4c
+[I 17:22:52.060 LabApp] Starting buffering for 4e874dfe-9b02-4862-9a98-d846fed58d4c:edd3889c-15d4-45b2-a43f-7218d1c1fbb5
+[I 17:23:04.227 LabApp] Saving file at /adv_prune_train_loop.py
+[I 17:23:20.327 LabApp] Saving file at /utils.py
+[I 17:34:23.496 LabApp] Saving file at /utils.py

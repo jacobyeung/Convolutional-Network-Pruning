@@ -1,11 +1,11 @@
 import os
-import torch
-import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 import tensorly as tl
 import tensorly.decomposition as dc
 from tqdm import tqdm
+import torch.nn.utils.prune as prune
 tl.set_backend('pytorch')
+import torch
 
 def create_summary_writer(model, data_loader, save_folder, model_id, device='cpu', conv=False):
     """Create a logger.
@@ -40,31 +40,48 @@ def create_summary_writer(model, data_loader, save_folder, model_id, device='cpu
             print("Failed to save model graph: {}".format(e))
     return writer
 
-def select_filters(model, valid_loader, valid_set):
+def select_filters(model, valid_loader, valid_set, remove_amount, device):
     """
     worst : list of highest divergence filters (worst filters) across batches
             Can select top-k afterwards.
+    imp   : list of divergences from tensor decomposition reconstruction.
+            lower means filter is more important.
     """
     worst = []
+    model.eval()
     for i, data in tqdm(enumerate(valid_loader),
                         total=len(valid_set) / valid_loader.batch_size):
         out, y = data
         out = out.to(device)
         y = y
-        for i, param in enumerate(model.children()):
+        for j, (name, param) in enumerate(model.named_children()):
             out = param(out)
-            if i == 0:
+            if j == 0:
                 break
-#         out = model(out)
         nout = out.detach()
 
-#         ny = y.detach().numpy()
-#         for j in range(out.shape[-1]//10, out.shape[-1], out.shape[-1]//4):
-#             print(j)
-        cp = dc.tucker(nout, 25)
+        cp = dc.tucker(nout, 15)
         pred = tl.tucker_tensor.tucker_to_tensor(cp)
         dist = torch.cdist(pred, nout)
         importance = torch.mean(dist, dim=[0, 2, 3])
-        w = torch.argmax(importance)
+        _, w = torch.topk(importance, remove_amount)
         worst.append(w)
+        
+        if i == (len(valid_set) // valid_loader.batch_size)//4:
+            break
     return worst
+
+class TuckerPruningMethod(prune.BasePruningMethod):
+    def __init__(self, amount, dim=0, filt=0):
+        self.amount = amount
+        self.dim = dim
+        self.filt = filt
+    PRUNING_TYPE = 'structured'
+    def compute_mask(self, t, default_mask):
+        mask = default_mask.clone()
+        mask[self.filt] = 0
+        return mask
+
+def TuckerStructured(module, name, amount=1, dim=8, filt=0):
+    TuckerPruningMethod.apply(module, name, amount, dim, filt)
+    return module

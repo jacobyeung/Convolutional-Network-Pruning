@@ -10,48 +10,36 @@ import ignite
 from ignite.engine import Engine, Events
 from ignite.handlers import Checkpoint, DiskSaver, global_step_from_engine
 from ignite.metrics import Accuracy, Loss
-from utils import *
-from collections import Counter
+from utils import create_summary_writer
 
 
-def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=2):
+def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, device, batch_size, max_epochs=5):
     assert prune_type in ['global_unstructured', 'structured']
-    total_prune_amount = tpa
+    total_prune_amount = 0.3 if prune_type == 'global_unstructured' else 0.1
     ds_train, ds_valid = ds
-    train_set, valid_set = dset
     min_y_train, min_y_val = min_y
-    model_id = f'{model_id}_{prune_type}_pruning_{tpa}'
-    valid_freq = 200 * 500 // batch_size // 3
-    
+    model_id = f'{model_id}_{prune_type}_pruning'
+
     conv_layers = [model.conv1]
+    for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
+        for bottleneck in sequential:
+            conv_layers.extend([bottleneck.conv1, bottleneck.conv2, bottleneck.conv3])
 
     def prune_model(model):
-#         remove_amount = total_prune_amount // (max_epochs)
-        remove_amount = total_prune_amount
+        remove_amount = total_prune_amount / (max_epochs * 10)
         print(f'pruned model by {remove_amount}')
-        worst = select_filters(model, ds_valid, valid_set, remove_amount, device)
-        worst = [k for k in Counter(torch.stack(worst).view(-1).cpu().numpy()).keys()]
-        worst.sort(reverse=True)
-        print(worst)
-        for layer in conv_layers:
-            for d in worst:
-                TuckerStructured(layer, name='weight', amount=1, dim=0, filt=d)
-        return worst
-    bad = prune_model(model)
-    zeros = []
-    for i in range(len(model.conv1.weight_mask)):
-        if torch.sum(model.conv1.weight_mask[i]) == 0.0:
-            zeros.append(i)
-    zeros.sort(reverse=True)
-    if zeros == bad:
-        print("correct;y zero'd filters")
-    else:
-        if len(zeros) == len(bad):
-            for i in range(len(zeros)):
-                if zeros[i] != bad[i]:
-                    wrong.append((bad[i], zeros[i]))
+        if prune_type == 'global_unstructured':
+            parameters_to_prune = [(layer, 'weight') for layer in conv_layers]
+            prune.global_unstructured(
+                parameters_to_prune,
+                pruning_method=prune.L1Unstructured,
+                amount=remove_amount,
+            )
         else:
-            print("diff number filters zero'd", zeros)
+            for layer in conv_layers:
+                prune.ln_structured(layer, name='weight', amount=remove_amount, n=1, dim=0)
+
+    prune_model(model)
 
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
@@ -112,8 +100,7 @@ def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_
         acc_val_metric.attach(valid_evaluator, "accuracy")
         loss_val_metric.attach(valid_evaluator, 'loss')
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=valid_freq))
-#         @trainer.on(Events.ITERATION_COMPLETED)
+        @trainer.on(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10))
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             metrics = valid_evaluator.state.metrics
@@ -125,7 +112,7 @@ def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_
             writer.add_scalar("validation/avg_accuracy", valid_avg_accuracy, engine.state.epoch)
             writer.add_scalar("validation/avg_error", 1. - valid_avg_accuracy, engine.state.epoch)
 
-#             prune_model(model)
+            prune_model(model)
             
 
         @trainer.on(Events.EPOCH_COMPLETED)
@@ -155,7 +142,7 @@ def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_
         def log_lr(engine):
             writer.add_scalar("lr", optimizer.param_groups[0]['lr'], engine.state.epoch)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=valid_freq))
+        @trainer.on(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10))
         def validation_value(engine):
             metrics = valid_evaluator.state.metrics
             valid_avg_accuracy = metrics['accuracy']
@@ -170,5 +157,5 @@ def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_
                              n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=valid_freq), handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
