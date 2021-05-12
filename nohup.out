@@ -235,3 +235,4 @@ Shutdown this notebook server (y/[n])? [C 20:18:31.217 LabApp] received signal 2
 [I 17:23:04.227 LabApp] Saving file at /adv_prune_train_loop.py
 [I 17:23:20.327 LabApp] Saving file at /utils.py
 [I 17:34:23.496 LabApp] Saving file at /utils.py
+[I 20:25:29.926 LabApp] Kernel started: ab007221-01b3-4dcc-9b46-5993dd36e00f
