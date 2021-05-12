@@ -7,7 +7,8 @@ import torchvision
 import torchvision.transforms as transforms
 from train_loop import train_loop
 from adv_train_loop import adv_train_loop
-from prune_train_loop import prune_train_loop
+# from prune_train_loop import prune_train_loop
+from adv_prune_train_loop2 import adv_prune_train_loop
 from models import ResNet50
 import os
 from glob import glob
@@ -112,7 +113,7 @@ def main():
     #         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
 
 #     adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, batch_size, 1)
-    for tpa in np.arange(0.05, 0.31, 0.05):
+    for tpa in np.arange(0.35, 0.61, 0.05):
         model = torchvision.models.wide_resnet50_2(pretrained=True)
         model.fc = nn.Linear(2048, 200)
         model = model.to(device)
@@ -122,7 +123,7 @@ def main():
         model_name = models[idx]
         model.load_state_dict(torch.load(model_name))
         print("Tensor Pruned: ", tpa)
-        prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, 'structured', device, batch_size, tpa, 1)
+        adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, 'structured', device, batch_size, tpa, 1)
 
 
 if __name__ == '__main__':
