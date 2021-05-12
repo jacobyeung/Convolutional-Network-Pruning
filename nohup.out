@@ -242,3 +242,5 @@ Shutdown this notebook server (y/[n])? [C 20:18:31.217 LabApp] received signal 2
 [I 20:47:03.710 LabApp] Saving file at /prune_train_loop_tucker.py
 [I 22:00:54.526 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:22312192-2f21-4834-946a-83432ef62adf
 [W 22:03:31.166 LabApp] Notebook prune.ipynb is not trusted
+[I 22:05:31.823 LabApp] Saving file at /prune.ipynb
+[W 22:05:31.824 LabApp] Notebook prune.ipynb is not trusted
