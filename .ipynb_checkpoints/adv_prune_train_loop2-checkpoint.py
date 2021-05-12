@@ -28,20 +28,19 @@ def adv_prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_ty
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
         for bottleneck in sequential:
             conv_layers.extend([bottleneck.conv1, bottleneck.conv2, bottleneck.conv3])
-
+    conv_layers = conv_layers[:22]
     def prune_model(model):
-        remove_amount = total_prune_amount / (max_epochs * 10)
-        print(f'pruned model by {remove_amount}')
+        print(f'pruned model by {total_prune_amount}')
         if prune_type == 'global_unstructured':
             parameters_to_prune = [(layer, 'weight') for layer in conv_layers]
             prune.global_unstructured(
                 parameters_to_prune,
                 pruning_method=prune.L1Unstructured,
-                amount=remove_amount,
+                amount=total_prune_amount,
             )
         else:
-            for i in range(22):
-                prune.ln_structured(conv_layers[i], name='weight', amount=remove_amount, n=1, dim=0)
+            for layer in conv_layers:
+                prune.ln_structured(layer, name='weight', amount=remove_amount, n=1, dim=0)
 
     prune_model(model)
 
@@ -127,8 +126,6 @@ def adv_prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_ty
             writer.add_scalar("validation/avg_loss", avg_nll, engine.state.epoch)
             writer.add_scalar("validation/avg_accuracy", valid_avg_accuracy, engine.state.epoch)
             writer.add_scalar("validation/avg_error", 1. - valid_avg_accuracy, engine.state.epoch)
-
-            prune_model(model)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def lr_scheduler(engine):
