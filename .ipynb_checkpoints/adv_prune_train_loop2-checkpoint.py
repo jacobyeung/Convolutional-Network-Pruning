@@ -15,16 +15,14 @@ from advertorch.attacks import GradientSignAttack
 from utils import create_summary_writer
 
 
-def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=5):
+def adv_prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, device, batch_size, max_epochs=5):
     assert prune_type in ['global_unstructured', 'structured']
-    total_prune_amount = tpa
-    remove_amount = tpa
+    total_prune_amount = 0.3 if prune_type == 'global_unstructured' else 0.1
     ds_train, ds_valid = ds
-    train_set, valid_set = dset
     min_y_train, min_y_val = min_y
     original_model = copy.deepcopy(model)
     original_model.eval()
-    model_id = f'{model_id}_{tpa}'
+    model_id = f'{model_id}_fgsm+{prune_type}'
 
     conv_layers = [model.conv1]
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
@@ -41,7 +39,7 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
                 amount=total_prune_amount,
             )
         else:
-            for layer in conv_layers[:22]:
+            for layer in conv_layers:
                 prune.ln_structured(layer, name='weight', amount=remove_amount, n=1, dim=0)
 
     prune_model(model)
