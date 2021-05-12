@@ -15,32 +15,32 @@ from advertorch.attacks import GradientSignAttack
 from utils import create_summary_writer
 
 
-def adv_prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, device, batch_size, max_epochs=5):
+def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=5):
     assert prune_type in ['global_unstructured', 'structured']
-    total_prune_amount = 0.3 if prune_type == 'global_unstructured' else 0.1
+    total_prune_amount = tpa
+    remove_amount = tpa
     ds_train, ds_valid = ds
+    train_set, valid_set = dset
     min_y_train, min_y_val = min_y
     original_model = copy.deepcopy(model)
     original_model.eval()
-    model_id = f'{model_id}_fgsm+{prune_type}'
+    model_id = f'{model_id}_{tpa}'
 
     conv_layers = [model.conv1]
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
         for bottleneck in sequential:
             conv_layers.extend([bottleneck.conv1, bottleneck.conv2, bottleneck.conv3])
-
     def prune_model(model):
-        remove_amount = total_prune_amount / (max_epochs * 10)
-        print(f'pruned model by {remove_amount}')
+        print(f'pruned model by {total_prune_amount}')
         if prune_type == 'global_unstructured':
             parameters_to_prune = [(layer, 'weight') for layer in conv_layers]
             prune.global_unstructured(
                 parameters_to_prune,
                 pruning_method=prune.L1Unstructured,
-                amount=remove_amount,
+                amount=total_prune_amount,
             )
         else:
-            for layer in conv_layers:
+            for layer in conv_layers[:22]:
                 prune.ln_structured(layer, name='weight', amount=remove_amount, n=1, dim=0)
 
     prune_model(model)
@@ -127,8 +127,6 @@ def adv_prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_ty
             writer.add_scalar("validation/avg_loss", avg_nll, engine.state.epoch)
             writer.add_scalar("validation/avg_accuracy", valid_avg_accuracy, engine.state.epoch)
             writer.add_scalar("validation/avg_error", 1. - valid_avg_accuracy, engine.state.epoch)
-
-            prune_model(model)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def lr_scheduler(engine):
