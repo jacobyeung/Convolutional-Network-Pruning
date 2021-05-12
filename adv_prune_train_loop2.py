@@ -12,19 +12,21 @@ from ignite.handlers import Checkpoint, DiskSaver, global_step_from_engine
 from ignite.metrics import Accuracy, Loss
 from advertorch.context import ctx_noparamgrad_and_eval
 from advertorch.attacks import GradientSignAttack
-from utils import create_summary_writer
-
+from utils import *
+from tqdm import tqdm
 
 def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=5):
-    assert prune_type in ['global_unstructured', 'structured']
+    #assert prune_type in ['global_unstructured', 'structured']
     total_prune_amount = tpa
     remove_amount = tpa
     ds_train, ds_valid = ds
     train_set, valid_set = dset
     min_y_train, min_y_val = min_y
+    train_set, valid_set = dset
+    total_prune_amount = tpa
     original_model = copy.deepcopy(model)
     original_model.eval()
-    model_id = f'{model_id}_{tpa}'
+    model_id = f'{model_id}_{tpa}_l1'
 
     conv_layers = [model.conv1]
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
@@ -41,11 +43,26 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
                 amount=total_prune_amount,
             )
         else:
-            for layer in conv_layers[:22]:
-                prune.ln_structured(layer, name='weight', amount=remove_amount, n=1, dim=0)
+            for layer in conv_layers:
 
     prune_model(model)
 
+    def valid_eval(model, dataset, dataloader, device, label):
+        right = 0
+        total = 0
+        model.eval()
+        with torch.no_grad():
+            for i, data in tqdm(enumerate(dataloader), total=len(dataset) / dataloader.batch_size):
+                data, y = data
+                data = data.to(device)
+                y = y.to(device) - label
+                ans = model.forward(data)
+                right += torch.sum(torch.eq(torch.argmax(ans, dim=1), y))
+                total += y.shape[0]
+        return right/total
+    valid_acc = valid_eval(model, valid_set, ds_valid, device, min_y_val)
+    print('initial accuracy:', valid_acc.item())
+    
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
         mom = params['momentum']
@@ -61,18 +78,18 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
         acc_val_metric = Accuracy(device=device)
         loss_val_metric = Loss(F.cross_entropy, device=device)
 
-        attack = GradientSignAttack(original_model, loss_fn=loss, eps=0.2)
+#         attack = GradientSignAttack(original_model, loss_fn=loss, eps=0.2)
 
         def train_step(engine, batch):
             model.train()
             x, y = batch
             x = x.to(device)
             y = y.to(device) - min_y_train
-            with ctx_noparamgrad_and_eval(model):
-                x_adv = attack.perturb(x, y)
-            optimizer.zero_grad()
-            x = torch.cat((x, x_adv))
-            y = torch.cat((y, y))
+#             with ctx_noparamgrad_and_eval(model):
+#                 x_adv = attack.perturb(x, y)
+#             optimizer.zero_grad()
+#             x = torch.cat((x, x_adv))
+#             y = torch.cat((y, y))
             ans = model.forward(x)
             l = loss(ans, y)
             optimizer.zero_grad()
@@ -90,9 +107,9 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
             x, y = batch
             x = x.to(device)
             y = y.to(device) - min_y_train
-            x_adv = attack.perturb(x, y)
-            x = torch.cat((x, x_adv))
-            y = torch.cat((y, y))
+#             x_adv = attack.perturb(x, y)
+#             x = torch.cat((x, x_adv))
+#             y = torch.cat((y, y))
             with torch.no_grad():
                 ans = model.forward(x)
             return ans, y
@@ -106,9 +123,9 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
             x, y = batch
             x = x.to(device)
             y = y.to(device) - min_y_val
-            x_adv = attack.perturb(x, y)
-            x = torch.cat((x, x_adv))
-            y = torch.cat((y, y))
+#             x_adv = attack.perturb(x, y)
+#             x = torch.cat((x, x_adv))
+#             y = torch.cat((y, y))
             with torch.no_grad():
                 ans = model.forward(x)
             return ans, y
@@ -117,7 +134,7 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
         acc_val_metric.attach(valid_evaluator, "accuracy")
         loss_val_metric.attach(valid_evaluator, 'loss')
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10))
+        @trainer.on(Events.ITERATION_COMPLETED(every=valid_freq))
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             metrics = valid_evaluator.state.metrics
@@ -135,7 +152,7 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
             avg_nll = metrics['accuracy']
             sched.step(avg_nll)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=50))
+        @trainer.on(Events.ITERATION_COMPLETED(every=100))
         def log_training_loss(engine):
             batch = engine.state.batch
             ds = DataLoader(TensorDataset(*batch), batch_size=batch_size)
@@ -156,7 +173,7 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
         def log_lr(engine):
             writer.add_scalar("lr", optimizer.param_groups[0]['lr'], engine.state.epoch)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10))
+        @trainer.on(Events.ITERATION_COMPLETED(every=valid_freq))
         def validation_value(engine):
             metrics = valid_evaluator.state.metrics
             valid_avg_accuracy = metrics['accuracy']
@@ -170,5 +187,5 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
                              n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10), handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=valid_freq), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
