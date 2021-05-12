@@ -25,40 +25,43 @@ def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_
     
     conv_layers = [model.conv1]
 
-     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
+    for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
         for bottleneck in sequential:
             conv_layers.extend([bottleneck.conv1, bottleneck.conv2, bottleneck.conv3])
     def prune_model(model):
-#         remove_amount = total_prune_amount // (max_epochs)
-        remove_amount = total_prune_amount
-        print(f'pruned model by {remove_amount}')
-        worst = select_filters(model, ds_valid, valid_set, remove_amount, device)
-        worst = [k for k in Counter(torch.stack(worst).view(-1).cpu().numpy()).keys()]
-        worst.sort(reverse=True)
-        print(worst)
-        for layer in conv_layers:
-            for d in worst:
-                TuckerStructured(layer, name='weight', amount=0, dim=0, filt=d)
-        return worst
-    bad = prune_model(model)
-    zeros = []
-    for i in range(len(model.conv1.weight_mask)):
-        if torch.sum(model.conv1.weight_mask[i]) == 0.0:
-            zeros.append(i)
-    zeros.sort(reverse=True)
-    wrong = []
-    if zeros == bad:
-        print("correctly zero'd filters")
-    else:
-        if len(zeros) == len(bad):
-            for i in range(len(zeros)):
-                if zeros[i] != bad[i]:
-                    wrong.append((bad[i], zeros[i]))
-            print(wrong)
-        else:
-            print("diff number filters zero'd", zeros)
+        print(f'pruned model by {total_prune_amount}')
+        worst, num_lay = select_filters(model, ds_valid, valid_set, total_prune_amount, device)
+        bad_filt = []
+        for i in range(num_lay):
+            bad_filt.append(worst[i::num_lay])
+        bye_filt = []
+        for f in bad_filt:
+            rem_filt = [k for k in Counter(torch.stack(f).view(-1).cpu().numpy()).keys()]
+            rem_filt.sort(reverse=True)
+            bye_filt.append(rem_filt)
+        for i, bad in enumerate(bye_filt):
+            for d in bad:
+                TuckerStructured(conv_layers[i], name='weight', amount=0, dim=0, filt=d)
+        return bye_filt, num_lay
+    bad, num_lay = prune_model(model)
+    print(bad)
             
-            
+    def valid_eval(model, dataset, dataloader, device, label):
+        right = 0
+        total = 0
+        model.eval()
+        with torch.no_grad():
+            for i, data in tqdm(enumerate(dataloader), total=len(dataset) / dataloader.batch_size):
+                data, y = data
+                data = data.to(device)
+                y = y.to(device) - label
+                ans = model.forward(data)
+                right += torch.sum(torch.eq(torch.argmax(ans, dim=1), y))
+                total += y.shape[0]
+        return right/total
+    valid_acc = valid_eval(model, valid_set, ds_valid, device, min_y_val)
+    print('initial accuracy:', valid_acc.item())
+    
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
         mom = params['momentum']
@@ -86,7 +89,8 @@ def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_
             l.backward()
             optimizer.step()
             with torch.no_grad():
-                for layer in conv_layers:
+                for layer_id in range(num_lay):
+                    layer = conv_layers[layer_id]
                     layer.weight *= layer.weight_mask  # make sure pruned weights stay 0
             return l.item()
 

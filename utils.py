@@ -6,7 +6,7 @@ from tqdm import tqdm
 import torch.nn.utils.prune as prune
 tl.set_backend('pytorch')
 import torch
-
+from torch.nn import Sequential, Conv2d
 def create_summary_writer(model, data_loader, save_folder, model_id, device='cpu', conv=False):
     """Create a logger.
 
@@ -40,7 +40,7 @@ def create_summary_writer(model, data_loader, save_folder, model_id, device='cpu
             print("Failed to save model graph: {}".format(e))
     return writer
 
-def select_filters(model, valid_loader, valid_set, remove_amount, device):
+def select_filters(model, valid_loader, valid_set, remove_percent, device):
     """
     worst : list of highest divergence filters (worst filters) across batches
             Can select top-k afterwards.
@@ -48,28 +48,51 @@ def select_filters(model, valid_loader, valid_set, remove_amount, device):
             lower means filter is more important.
     """
     worst = []
+    bneck_layers = ['conv1', 'bn1', 'conv2', 'bn2', 'conv3', 'bn3', 'relu']
     model.eval()
-    for i, data in tqdm(enumerate(valid_loader),
-                        total=len(valid_set) / valid_loader.batch_size):
-        out, y = data
-        out = out.to(device)
-        y = y
-        for j, (name, param) in enumerate(model.named_children()):
-            out = param(out)
-            if j == 0:
-                break
-        nout = out.detach()
+    num_layers = 0
+    with torch.no_grad():
+        for i, data in tqdm(enumerate(valid_loader),
+                            total=len(valid_set) / valid_loader.batch_size):
+            out, y = data
+            out = out.to(device)
+            y = y
+            sizes = []
+            num_lay = 0
+            for j, (name, param) in enumerate(model.named_children()):
+                if name in ['avgpool', 'layer3']:
+                    break
+                if type(param) == Sequential:
+                    for bottle in param:
+                        for b in bneck_layers:
+                            out = getattr(bottle, b)(out)
+                            if b in ['conv1', 'conv2', 'conv3']:
+                                nout = out.detach().clone()
+                                num_rem = int(nout.shape[1] * remove_percent)
+                                cp = dc.tucker(nout, 15)
+                                pred = tl.tucker_tensor.tucker_to_tensor(cp)
+                                dist = torch.cdist(pred, nout)
+                                importance = torch.mean(dist, dim=[0, 2, 3])
+                                _, w = torch.topk(importance, num_rem)
+                                worst.append(w)
+                                num_lay += 1
 
-        cp = dc.tucker(nout, 15)
-        pred = tl.tucker_tensor.tucker_to_tensor(cp)
-        dist = torch.cdist(pred, nout)
-        importance = torch.mean(dist, dim=[0, 2, 3])
-        _, w = torch.topk(importance, remove_amount)
-        worst.append(w)
-        
-        if i == (len(valid_set) // valid_loader.batch_size)//4:
-            break
-    return worst
+                else:
+                    out = param(out)
+                    if type(param) == Conv2d:
+                        nout = out.detach().clone()
+                        num_rem = int(nout.shape[1] * remove_percent)
+                        cp = dc.tucker(nout, 15)
+                        pred = tl.tucker_tensor.tucker_to_tensor(cp)
+                        dist = torch.cdist(pred, nout)
+                        importance = torch.mean(dist, dim=[0, 2, 3])
+                        _, w = torch.topk(importance, num_rem)
+                        worst.append(w)
+                        num_lay += 1
+            if i * valid_loader.batch_size >= 200:
+                num_layers = num_lay
+                break
+    return worst, num_layers
 
 class TuckerPruningMethod(prune.BasePruningMethod):
     def __init__(self, amount, dim=0, filt=0):
