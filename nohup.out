@@ -236,3 +236,7 @@ Shutdown this notebook server (y/[n])? [C 20:18:31.217 LabApp] received signal 2
 [I 17:23:20.327 LabApp] Saving file at /utils.py
 [I 17:34:23.496 LabApp] Saving file at /utils.py
 [I 20:25:29.926 LabApp] Kernel started: ab007221-01b3-4dcc-9b46-5993dd36e00f
+[I 20:46:12.097 LabApp] Starting buffering for 4e874dfe-9b02-4862-9a98-d846fed58d4c:3e8b34b0-5a2b-4997-9bb3-913c3d0f8ab6
+[I 20:46:12.526 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:0bf2e182-65d7-40bd-8902-6db9e87dcddf
+[I 20:46:27.558 LabApp] Creating new file in /
+[I 20:47:03.710 LabApp] Saving file at /prune_train_loop_tucker.py
