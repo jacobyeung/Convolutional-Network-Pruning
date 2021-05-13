@@ -29,11 +29,13 @@ resnet50 = torchvision.models.resnet50()
 resnet50.fc = nn.Linear(2048, 200)
 resnet50.load_state_dict(torch.load('outputs/best_models/resnet50.pt'))
 resnet50.to(device)
+resnet50.eval()
 
 resnet101 = torchvision.models.resnet101()
 resnet101.fc = nn.Linear(2048, 200)
 resnet101.load_state_dict(torch.load('outputs/best_models/resnet101.pt'))
 resnet101.to(device)
+resnet101.eval()
 
 input_file = open(sys.argv[1])
 output_file = open('eval_classified.csv', 'w', newline='')
