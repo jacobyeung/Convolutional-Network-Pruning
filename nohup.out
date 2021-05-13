@@ -240,3 +240,91 @@ Shutdown this notebook server (y/[n])? [C 20:18:31.217 LabApp] received signal 2
 [I 20:46:12.526 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:0bf2e182-65d7-40bd-8902-6db9e87dcddf
 [I 20:46:27.558 LabApp] Creating new file in /
 [I 20:47:03.710 LabApp] Saving file at /prune_train_loop_tucker.py
+[I 22:00:54.526 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:22312192-2f21-4834-946a-83432ef62adf
+[W 22:03:31.166 LabApp] Notebook prune.ipynb is not trusted
+[I 22:05:31.823 LabApp] Saving file at /prune.ipynb
+[W 22:05:31.824 LabApp] Notebook prune.ipynb is not trusted
+[I 00:51:01.164 LabApp] Starting buffering for ae9e34dd-bd4a-49a5-9271-17c54cfc6371:2e52fbf2-3043-4797-9aa4-17901303ab71
+[I 00:51:11.179 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:42a60a8a-1951-44dd-ae96-b25070480095
+[I 00:51:45.783 LabApp] Starting buffering for cc5352e4-4819-455b-85b2-55fd0453da34:d81942cd-2d8f-40a8-a19f-54af0580eb26
+[I 00:51:45.879 LabApp] Restoring connection for cc5352e4-4819-455b-85b2-55fd0453da34:d81942cd-2d8f-40a8-a19f-54af0580eb26
+[I 00:51:45.895 LabApp] Starting buffering for cc5352e4-4819-455b-85b2-55fd0453da34:d81942cd-2d8f-40a8-a19f-54af0580eb26
+[I 00:51:47.277 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:2947d689-eb8d-43de-a21a-b638288f4f31
+[I 00:51:47.385 LabApp] Build is up to date
+[W 00:51:47.781 LabApp] Notebook validation.ipynb is not trusted
+[W 00:51:47.793 LabApp] Notebook timer.ipynb is not trusted
+[W 00:51:47.829 LabApp] Notebook prune.ipynb is not trusted
+[I 00:51:49.014 LabApp] Discarding 3 buffered messages for cc5352e4-4819-455b-85b2-55fd0453da34:d81942cd-2d8f-40a8-a19f-54af0580eb26
+[I 00:51:52.069 LabApp] Starting buffering for ae9e34dd-bd4a-49a5-9271-17c54cfc6371:12e7b93a-f88a-4fe1-bf4e-10879622b3cf
+[I 00:52:01.893 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:55c0fee6-e217-4209-b9bb-5655aa3d7907
+[W 00:52:03.268 LabApp] Notebook prune.ipynb is not trusted
+[I 00:53:48.305 LabApp] Saving file at /validation.ipynb
+[W 00:53:48.305 LabApp] Notebook validation.ipynb is not trusted
+[I 01:10:41.392 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:6af6907a-bbdf-4dc0-a522-5b25fc962ae2
+[W 01:10:43.976 LabApp] Notebook prune.ipynb is not trusted
+[I 01:11:36.756 LabApp] Saving file at /prune.ipynb
+[W 01:11:36.757 LabApp] Notebook prune.ipynb is not trusted
+[I 01:11:37.199 LabApp] Starting buffering for ab007221-01b3-4dcc-9b46-5993dd36e00f:d3931760-f703-4798-bcb3-c478a4662a94
+[W 01:11:38.423 LabApp] Notebook prune.ipynb is not trusted
+[I 01:11:50.799 LabApp] interrupted
+Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+4 active kernels
+The Jupyter Notebook is running at:
+http://localhost:8890/?token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b
+ or http://127.0.0.1:8890/?token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b
+Shutdown this notebook server (y/[n])? [C 01:11:51.904 LabApp] received signal 2, stopping
+[I 01:11:51.910 LabApp] Shutting down 4 kernels
+[I 01:11:52.324 LabApp] Kernel shutdown: cc5352e4-4819-455b-85b2-55fd0453da34
+[I 01:11:52.325 LabApp] Kernel shutdown: ae9e34dd-bd4a-49a5-9271-17c54cfc6371
+[I 01:11:52.326 LabApp] Kernel shutdown: 4e874dfe-9b02-4862-9a98-d846fed58d4c
+[I 01:11:52.326 LabApp] Kernel shutdown: ab007221-01b3-4dcc-9b46-5993dd36e00f
+[I 2021-05-12 01:12:01.980 ServerApp] jupyterlab | extension was successfully linked.
+[I 2021-05-12 01:12:02.417 ServerApp] nbclassic | extension was successfully linked.
+[I 2021-05-12 01:12:02.477 LabApp] JupyterLab extension loaded from /Users/jacobyeung/anaconda3/envs/ml/lib/python3.7/site-packages/jupyterlab
+[I 2021-05-12 01:12:02.478 LabApp] JupyterLab application directory is /Users/jacobyeung/anaconda3/envs/ml/share/jupyter/lab
+[I 2021-05-12 01:12:02.482 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2021-05-12 01:12:02.490 ServerApp] nbclassic | extension was successfully loaded.
+[I 2021-05-12 01:12:02.490 ServerApp] Serving notebooks from local directory: /Users/jacobyeung/Berkeley/Spring 2021/CS 182/CS-182-Project
+[I 2021-05-12 01:12:02.490 ServerApp] Jupyter Server 1.2.3 is running at:
+[I 2021-05-12 01:12:02.490 ServerApp] http://localhost:8890/lab?token=a8ba0ef091441bd026aecf6e73a3adf30f13ef062eb0dcb1
+[I 2021-05-12 01:12:02.490 ServerApp]  or http://127.0.0.1:8890/lab?token=a8ba0ef091441bd026aecf6e73a3adf30f13ef062eb0dcb1
+[I 2021-05-12 01:12:02.490 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2021-05-12 01:12:02.513 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///Users/jacobyeung/Library/Jupyter/runtime/jpserver-77653-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8890/lab?token=a8ba0ef091441bd026aecf6e73a3adf30f13ef062eb0dcb1
+     or http://127.0.0.1:8890/lab?token=a8ba0ef091441bd026aecf6e73a3adf30f13ef062eb0dcb1
+[W 2021-05-12 01:12:03.291 ServerApp] Clearing invalid/expired login cookie username-localhost-8890
+[W 2021-05-12 01:12:03.291 ServerApp] Couldn't authenticate WebSocket connection
+[W 2021-05-12 01:12:03.291 ServerApp] Clearing invalid/expired login cookie username-localhost-8890
+[W 2021-05-12 01:12:03.292 ServerApp] Clearing invalid/expired login cookie username-localhost-8890
+[W 2021-05-12 01:12:03.303 ServerApp] 403 GET /api/kernels/cc5352e4-4819-455b-85b2-55fd0453da34/channels?session_id=4975dffd-b3f8-483a-b962-556616f81e47&token=2a7f0243e0bb595d5b36141ab9a29dc4ff8ca0170dccb91b (127.0.0.1) 14.39ms referer=None
+[I 2021-05-12 01:12:07.911 LabApp] Build is up to date
+[W 2021-05-12 01:12:09.171 ServerApp] 404 GET /api/contents/hw1.ipynb?content=0&1620807129163 (127.0.0.1): No such file or directory: hw1.ipynb
+[W 2021-05-12 01:12:09.172 ServerApp] No such file or directory: hw1.ipynb
+[W 2021-05-12 01:12:09.172 ServerApp] 404 GET /api/contents/hw1.ipynb?content=0&1620807129163 (127.0.0.1) 1.73ms referer=http://localhost:8890/lab
+[W 2021-05-12 01:12:09.174 ServerApp] 404 GET /api/contents/hw2.ipynb?content=0&1620807129163 (127.0.0.1): No such file or directory: hw2.ipynb
+[W 2021-05-12 01:12:09.174 ServerApp] No such file or directory: hw2.ipynb
+[W 2021-05-12 01:12:09.175 ServerApp] 404 GET /api/contents/hw2.ipynb?content=0&1620807129163 (127.0.0.1) 1.67ms referer=http://localhost:8890/lab
+[W 2021-05-12 01:12:09.175 ServerApp] 404 GET /api/contents/SDSS_quasar.dat?content=0&1620807129163 (127.0.0.1): No such file or directory: SDSS_quasar.dat
+[W 2021-05-12 01:12:09.175 ServerApp] No such file or directory: SDSS_quasar.dat
+[W 2021-05-12 01:12:09.175 ServerApp] 404 GET /api/contents/SDSS_quasar.dat?content=0&1620807129163 (127.0.0.1) 1.85ms referer=http://localhost:8890/lab
+[W 2021-05-12 01:12:17.169 ServerApp] Notebook prune.ipynb is not trusted
+[I 2021-05-12 01:12:18.475 ServerApp] Kernel started: 905a18f9-275d-45cf-86a4-f9ee79991cd5
+[W 2021-05-12 01:12:55.745 ServerApp] Notebook prune.ipynb is not trusted
+[I 2021-05-12 01:13:05.561 ServerApp] Saving file at /prune.ipynb
+[W 2021-05-12 01:13:05.563 ServerApp] Notebook prune.ipynb is not trusted
+[I 2021-05-12 01:53:11.336 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 01:53:12.393 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 01:55:10.543 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 12:34:25.028 ServerApp] Saving file at /main.py
+[W 2021-05-12 16:43:56.933 ServerApp] Notebook accs.ipynb is not trusted
+[I 2021-05-12 16:43:57.339 ServerApp] Kernel started: 8a82c233-bcf2-4a9e-801a-fdd31b66fbb6
+[I 2021-05-12 16:45:57.464 ServerApp] Saving file at /accs.ipynb
+[W 2021-05-12 16:45:57.467 ServerApp] Notebook accs.ipynb is not trusted
+[I 2021-05-12 17:24:23.054 ServerApp] Saving file at /main.py
+[I 2021-05-12 17:24:56.239 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 18:09:02.981 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 18:09:41.100 ServerApp] Saving file at /main.py

@@ -10,37 +10,58 @@ import ignite
 from ignite.engine import Engine, Events
 from ignite.handlers import Checkpoint, DiskSaver, global_step_from_engine
 from ignite.metrics import Accuracy, Loss
-from utils import create_summary_writer
+from utils import *
+from collections import Counter
 
 
-def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, device, batch_size, max_epochs=5):
+def prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=2):
     assert prune_type in ['global_unstructured', 'structured']
-    total_prune_amount = 0.3 if prune_type == 'global_unstructured' else 0.1
+    total_prune_amount = tpa
     ds_train, ds_valid = ds
+    train_set, valid_set = dset
     min_y_train, min_y_val = min_y
-    model_id = f'{model_id}_{prune_type}_pruning'
-
+    model_id = f'{model_id}_{prune_type}_pruning_{tpa}'
+    valid_freq = 200 * 500 // batch_size // 3
+    
     conv_layers = [model.conv1]
+
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
         for bottleneck in sequential:
             conv_layers.extend([bottleneck.conv1, bottleneck.conv2, bottleneck.conv3])
-
     def prune_model(model):
-        remove_amount = total_prune_amount / (max_epochs * 10)
-        print(f'pruned model by {remove_amount}')
-        if prune_type == 'global_unstructured':
-            parameters_to_prune = [(layer, 'weight') for layer in conv_layers]
-            prune.global_unstructured(
-                parameters_to_prune,
-                pruning_method=prune.L1Unstructured,
-                amount=remove_amount,
-            )
-        else:
-            for layer in conv_layers:
-                prune.ln_structured(layer, name='weight', amount=remove_amount, n=1, dim=0)
-
-    prune_model(model)
-
+        print(f'pruned model by {total_prune_amount}')
+        worst, num_lay = select_filters(model, ds_valid, valid_set, total_prune_amount, device)
+        bad_filt = []
+        for i in range(num_lay):
+            bad_filt.append(worst[i::num_lay])
+        bye_filt = []
+        for f in bad_filt:
+            rem_filt = [k for k in Counter(torch.stack(f).view(-1).cpu().numpy()).keys()]
+            rem_filt.sort(reverse=True)
+            bye_filt.append(rem_filt)
+        for i, bad in enumerate(bye_filt):
+            for d in bad:
+                TuckerStructured(conv_layers[i], name='weight', amount=0, dim=0, filt=d)
+        return bye_filt, num_lay
+    bad, num_lay = prune_model(model)
+    print(bad)
+            
+    def valid_eval(model, dataset, dataloader, device, label):
+        right = 0
+        total = 0
+        model.eval()
+        with torch.no_grad():
+            for i, data in tqdm(enumerate(dataloader), total=len(dataset) / dataloader.batch_size):
+                data, y = data
+                data = data.to(device)
+                y = y.to(device) - label
+                ans = model.forward(data)
+                right += torch.sum(torch.eq(torch.argmax(ans, dim=1), y))
+                total += y.shape[0]
+        return right/total
+    valid_acc = valid_eval(model, valid_set, ds_valid, device, min_y_val)
+    print('initial accuracy:', valid_acc.item())
+    
     with create_summary_writer(model, ds_train, base_data, model_id, device=device) as writer:
         lr = params['lr']
         mom = params['momentum']
@@ -68,7 +89,8 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
             l.backward()
             optimizer.step()
             with torch.no_grad():
-                for layer in conv_layers:
+                for layer_id in range(num_lay):
+                    layer = conv_layers[layer_id]
                     layer.weight *= layer.weight_mask  # make sure pruned weights stay 0
             return l.item()
 
@@ -100,7 +122,8 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
         acc_val_metric.attach(valid_evaluator, "accuracy")
         loss_val_metric.attach(valid_evaluator, 'loss')
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10))
+        @trainer.on(Events.ITERATION_COMPLETED(every=valid_freq))
+#         @trainer.on(Events.ITERATION_COMPLETED)
         def log_validation_results(engine):
             valid_evaluator.run(ds_valid)
             metrics = valid_evaluator.state.metrics
@@ -112,7 +135,7 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
             writer.add_scalar("validation/avg_accuracy", valid_avg_accuracy, engine.state.epoch)
             writer.add_scalar("validation/avg_error", 1. - valid_avg_accuracy, engine.state.epoch)
 
-            prune_model(model)
+#             prune_model(model)
             
 
         @trainer.on(Events.EPOCH_COMPLETED)
@@ -121,7 +144,7 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
             avg_nll = metrics['accuracy']
             sched.step(avg_nll)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=50))
+        @trainer.on(Events.ITERATION_COMPLETED(every=100))
         def log_training_loss(engine):
             batch = engine.state.batch
             ds = DataLoader(TensorDataset(*batch), batch_size=batch_size)
@@ -130,7 +153,7 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
             accuracy = metrics['accuracy']
             nll = metrics['loss']
             iter = (engine.state.iteration - 1) % len(ds_train) + 1
-            if (iter % 50) == 0:
+            if (iter % 100) == 0:
                 print("Epoch[{}] Iter[{}/{}] Accuracy: {:.2f} Loss: {:.2f}"
                       .format(engine.state.epoch, iter, len(ds_train), accuracy, nll))
             writer.add_scalar("batchtraining/detloss", nll, engine.state.epoch)
@@ -142,7 +165,7 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
         def log_lr(engine):
             writer.add_scalar("lr", optimizer.param_groups[0]['lr'], engine.state.epoch)
 
-        @trainer.on(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10))
+        @trainer.on(Events.ITERATION_COMPLETED(every=valid_freq))
         def validation_value(engine):
             metrics = valid_evaluator.state.metrics
             valid_avg_accuracy = metrics['accuracy']
@@ -157,5 +180,5 @@ def prune_train_loop(model, params, ds, min_y, base_data, model_id, prune_type, 
                              n_saved=None)
 
         # kick everything off
-        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=200 * 5000 // batch_size // 10), handler)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED(every=valid_freq), handler)
         trainer.run(ds_train, max_epochs=max_epochs)
