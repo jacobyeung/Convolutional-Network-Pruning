@@ -326,3 +326,5 @@ Shutdown this notebook server (y/[n])? [C 01:11:51.904 LabApp] received signal 2
 [W 2021-05-12 16:45:57.467 ServerApp] Notebook accs.ipynb is not trusted
 [I 2021-05-12 17:24:23.054 ServerApp] Saving file at /main.py
 [I 2021-05-12 17:24:56.239 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 18:09:02.981 ServerApp] Saving file at /adv_prune_train_loop2.py
+[I 2021-05-12 18:09:41.100 ServerApp] Saving file at /main.py
