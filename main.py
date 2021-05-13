@@ -7,8 +7,13 @@ import torchvision
 import torchvision.transforms as transforms
 from train_loop import train_loop
 from adv_train_loop import adv_train_loop
+<<<<<<< HEAD
+from adv_prune_train_loop2 import adv_prune_train_loop
+from prune_train_loop import prune_train_loop
+=======
 # from prune_train_loop import prune_train_loop
 from adv_prune_train_loop2 import adv_prune_train_loop
+>>>>>>> f88211bcc68f0c737b34ecd6e22cb9711c8b735e
 from models import ResNet50
 import os
 from glob import glob
@@ -113,7 +118,15 @@ def main():
     #         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
 
 #     adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, batch_size, 1)
+<<<<<<< HEAD
     for tpa in np.arange(0.65, 0.71, 0.05):
+=======
+<<<<<<< HEAD
+    for tpa in np.arange(0.65, 0.91, 0.05):
+=======
+    for tpa in np.arange(0.35, 0.61, 0.05):
+>>>>>>> f88211bcc68f0c737b34ecd6e22cb9711c8b735e
+>>>>>>> 4983abff9f5e19e1643d194a3e8c3657a7ec8956
         model = torchvision.models.wide_resnet50_2(pretrained=True)
         model.fc = nn.Linear(2048, 200)
         model = model.to(device)

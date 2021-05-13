@@ -15,16 +15,24 @@ from advertorch.attacks import GradientSignAttack
 from utils import *
 from tqdm import tqdm
 
-def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=1):
-#     assert prune_type in ['global_unstructured', 'structured']
+def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, prune_type, device, batch_size, tpa, max_epochs=5):
+    #assert prune_type in ['global_unstructured', 'structured']
+    total_prune_amount = tpa
+    remove_amount = tpa
     ds_train, ds_valid = ds
+    train_set, valid_set = dset
     min_y_train, min_y_val = min_y
     train_set, valid_set = dset
     total_prune_amount = tpa
     original_model = copy.deepcopy(model)
     original_model.eval()
+<<<<<<< HEAD
     model_id = f'{model_id}_{prune_type}_pruning_{tpa}_l1'
     valid_freq = 200 * 500 // batch_size // 3
+=======
+    model_id = f'{model_id}_{tpa}_l1'
+
+>>>>>>> 4983abff9f5e19e1643d194a3e8c3657a7ec8956
     conv_layers = [model.conv1]
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
         for bottleneck in sequential:
@@ -41,7 +49,6 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
             )
         else:
             for layer in conv_layers:
-                prune.ln_structured(layer, name='weight', amount=total_prune_amount, n=1, dim=0)
 
     prune_model(model)
 
