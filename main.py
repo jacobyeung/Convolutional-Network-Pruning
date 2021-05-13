@@ -113,7 +113,7 @@ def main():
     #         adv_train_loop(model, params, ds, base_data, model_id, attack_type, device, batch_size, 1)
 
 #     adv_train_loop(model, params, ds, min_y, base_data, model_id, 'fgsm', device, batch_size, 1)
-    for tpa in np.arange(0.35, 0.61, 0.05):
+    for tpa in np.arange(0.65, 0.71, 0.05):
         model = torchvision.models.wide_resnet50_2(pretrained=True)
         model.fc = nn.Linear(2048, 200)
         model = model.to(device)

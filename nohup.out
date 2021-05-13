@@ -320,3 +320,9 @@ Shutdown this notebook server (y/[n])? [C 01:11:51.904 LabApp] received signal 2
 [I 2021-05-12 01:53:12.393 ServerApp] Saving file at /adv_prune_train_loop2.py
 [I 2021-05-12 01:55:10.543 ServerApp] Saving file at /adv_prune_train_loop2.py
 [I 2021-05-12 12:34:25.028 ServerApp] Saving file at /main.py
+[W 2021-05-12 16:43:56.933 ServerApp] Notebook accs.ipynb is not trusted
+[I 2021-05-12 16:43:57.339 ServerApp] Kernel started: 8a82c233-bcf2-4a9e-801a-fdd31b66fbb6
+[I 2021-05-12 16:45:57.464 ServerApp] Saving file at /accs.ipynb
+[W 2021-05-12 16:45:57.467 ServerApp] Notebook accs.ipynb is not trusted
+[I 2021-05-12 17:24:23.054 ServerApp] Saving file at /main.py
+[I 2021-05-12 17:24:56.239 ServerApp] Saving file at /adv_prune_train_loop2.py

@@ -24,7 +24,7 @@ def adv_prune_train_loop(model, params, ds, dset, min_y, base_data, model_id, pr
     original_model = copy.deepcopy(model)
     original_model.eval()
     model_id = f'{model_id}_{prune_type}_pruning_{tpa}_l1'
-    valid_freq = 200 * 5000 // batch_size // 3
+    valid_freq = 200 * 500 // batch_size // 3
     conv_layers = [model.conv1]
     for sequential in [model.layer1, model.layer2, model.layer3, model.layer4]:
         for bottleneck in sequential:
